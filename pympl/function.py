@@ -69,8 +69,13 @@ class Function(object):
 
         return encoded_kwargs
 
+
+class GuidPasswordPrefill(object):
     def _prefill_args(self):
-        return {}
+        return {
+            'GUID': self.client.guid,
+            'Password': self.client.password
+        }
 
 
 class FunctionRequest(object):
@@ -250,7 +255,7 @@ class AttachFileRequest(FunctionRequest):
         return guid, int(junk), message
 
 
-class UpdateDefaultImage(Function):
+class UpdateDefaultImage(Function, GuidPasswordPrefill):
     _signature = (
         ('GUID', str),
         ('Password', str),
@@ -258,12 +263,6 @@ class UpdateDefaultImage(Function):
         ('RecordID', int),
         ('UniqueName', str)
     )
-
-    def _prefill_args(self):
-        return {
-            'GUID': self.client.guid,
-            'Password': self.client.password
-        }
 
     def make_request(self, *args, **kwargs):
         return UpdateDefaultImageRequest(self, args, kwargs)
@@ -277,19 +276,13 @@ class UpdateDefaultImageRequest(FunctionRequest):
         return guid, int(junk), message
 
 
-class ExecuteStoredProcedure(Function):
+class ExecuteStoredProcedure(Function, GuidPasswordPrefill):
     _signature = (
         ('GUID', str),
         ('Password', str),
         ('StoredProcedureName', str),
         ('RequestString', _make_request_string)
     )
-
-    def _prefill_args(self):
-        return {
-            'GUID': self.client.guid,
-            'Password': self.client.password
-        }
 
     def make_request(self, *args, **kwargs):
         return ExecuteStoredProcedureRequest(self, args, kwargs)
@@ -330,7 +323,7 @@ class ExecuteStoredProcedureResponse(object):
         return result
 
 
-class FindOrCreateUserAccount(Function):
+class FindOrCreateUserAccount(Function, GuidPasswordPrefill):
     _signature = (
         ('GUID', str),
         ('Password', str),
@@ -340,14 +333,8 @@ class FindOrCreateUserAccount(Function):
         ('EmailAddress', str)
     )
 
-    def _prefill_args(self):
-        return {
-            'GUID': self.client.guid,
-            'Password': self.client.password
-        }
 
-
-class UpdateUserAccount(Function):
+class UpdateUserAccount(Function, GuidPasswordPrefill):
     _signature = (
         ('GUID', str),
         ('Password', str),
@@ -366,12 +353,6 @@ class UpdateUserAccount(Function):
         ('MaritalStatusID', int)
     )
 
-    def _prefill_args(self):
-        return {
-            'GUID': self.client.guid,
-            'Password': self.client.password
-        }
-
     def make_request(self, *args, **kwargs):
         return UpdateUserAccountRequest(self, args, kwargs)
 
@@ -384,19 +365,13 @@ class UpdateUserAccountRequest(FunctionRequest):
         return int(id_), int(junk), message
 
 
-class ResetPassword(Function):
+class ResetPassword(Function, GuidPasswordPrefill):
     _signature = (
         ('GUID', str),
         ('Password', str),
         ('FirstName', str),
         ('EmailAddress', str)
     )
-
-    def _prefill_args(self):
-        return {
-            'GUID': self.client.guid,
-            'Password': self.client.password
-        }
 
     def make_request(self, *args, **kwargs):
         return ResetPasswordRequest(self, args, kwargs)
