@@ -20,3 +20,15 @@ class AddRecordError(FunctionError):
 
 class UpdateRecordError(FunctionError):
     pass
+
+
+class UpdateDefaultImageError(FunctionError):
+    pass
+
+
+class UpdateUserAccountError(FunctionError):
+    pass
+
+
+class ResetPasswordError(FunctionError):
+    pass

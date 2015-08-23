@@ -46,8 +46,5 @@ class Client(object):
         self.sp = StoredProcedureFactory(self)
         self.table = TableFactory(self)
 
-    #def table(self, name, primary_key=None):
-    #    return Table(self, name, primary_key=primary_key)
-
-    #def record(self, table_name, primary_key=None, **kwargs):
-    #    return self.table(table_name, primary_key).record(**kwargs)
+    def __repr__(self):
+        return "<pympl.Client(%s)>" % self.wsdl

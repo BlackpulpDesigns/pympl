@@ -1,6 +1,7 @@
 from datetime import datetime, date
 from decimal import Decimal
 from dateutil.parser import parse as parse_date
+import uuid
 
 
 class DateTime(object):
@@ -71,6 +72,14 @@ class Null(object):
         return None
 
 
+class Uuid(object):
+    def encode(self, value):
+        return str(value) if value else ''
+
+    def decode(self, value):
+        return uuid.UUID(value) if value else None
+
+
 DATETIME = DateTime()
 STRING = String()
 INTEGER = Integer()
@@ -78,6 +87,7 @@ FLOAT = Float()
 NUMERIC = Numeric()
 BOOLEAN = Boolean()
 NULL = Null()
+UUID = Uuid()
 
 
 def encode_value(value):
@@ -87,7 +97,8 @@ def encode_value(value):
         int: INTEGER,
         bool: BOOLEAN,
         float: FLOAT,
-        type(None): NULL
+        type(None): NULL,
+        uuid.UUID: UUID
     }
 
     if type(value) in encoding_map:
@@ -115,7 +126,7 @@ all_types = {
     'decimal': NUMERIC,
     'varchar': STRING,
     'text': STRING,
-    'uniqueidentifier': STRING,
+    'uniqueidentifier': UUID,
     'nvarchar': STRING,
     'binary': STRING,
     'time': STRING,

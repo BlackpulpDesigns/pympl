@@ -2,9 +2,19 @@ from pympl.requeststring import RequestString
 from pympl.resolvers import SchemaResolver
 import pympl.exc as exc
 from suds.sax.text import Text
+from datetime import date
 
 
 _functions = {}
+
+
+def _make_request_string(string):
+    if string:
+        return (
+            string if isinstance(string, basestring) else
+            str(RequestString(string))
+        )
+    return ''
 
 
 class FunctionMeta(type):
@@ -26,6 +36,9 @@ class Function(object):
         request = self.make_request(*args, **kwargs)
         return request.call()
 
+    def __repr__(self):
+        return "<pymple.function.%s>" % type(self).__name__
+
     def make_request(self, *args, **kwargs):
         return FunctionRequest(self, args, kwargs)
 
@@ -39,7 +52,8 @@ class Function(object):
         encoded_args = []
 
         for i, arg in enumerate(args):
-            encoded_args.append(self._signature[i][1](arg))
+            encoded_args.append(
+                '' if arg is None else self._signature[i][1](arg))
 
         return encoded_args
 
@@ -48,7 +62,10 @@ class Function(object):
 
         for (arg, type_) in self._signature:
             if arg in kwargs:
-                encoded_kwargs[arg] = type_(kwargs[arg])
+                encoded_kwargs[arg] = (
+                    '' if kwargs[arg] is None else
+                    type_(kwargs[arg])
+                )
 
         return encoded_kwargs
 
@@ -61,6 +78,9 @@ class FunctionRequest(object):
         self.function = function
         self.args = args
         self.kwargs = kwargs
+
+    def __repr__(self):
+        return "<pymple.function.%s>" % type(self).__name__
 
     def call(self):
         function_name = type(self.function).__name__
@@ -85,7 +105,7 @@ class AddRecord(Function):
         ('UserID', int),
         ('TableName', str),
         ('PrimaryKeyField', str),
-        ('RequestString', str)
+        ('RequestString', _make_request_string)
     )
 
     def _prefill_args(self):
@@ -114,7 +134,7 @@ class UpdateRecord(Function):
         ('UserID', int),
         ('TableName', str),
         ('PrimaryKeyField', str),
-        ('RequestString', str)
+        ('RequestString', _make_request_string)
     )
 
     def _prefill_args(self):
@@ -188,7 +208,73 @@ class GetUserInfoResponse(object):
         self.marital_statuses = self._resolver.Table5
 
     def __repr__(self):
-        return "<GetUserInfoResponse(%s)>" % self.user.get('User_Name')
+        return "<pymple.function.GetUserInfoResponse(%s)>" % (
+            self.user.get('User_Name')
+        )
+
+
+def _encode_file_contents(obj):
+    if hasattr(obj, 'read'):
+        return obj.read().encode('base64')
+    else:
+        return obj.encode('base64')
+
+
+class AttachFile(Function):
+    _signature = (
+        ('GUID', str),
+        ('Password', str),
+        ('FileContents', _encode_file_contents),
+        ('FileName', str),
+        ('PageID', int),
+        ('RecordID', int),
+        ('FileDescription', str),
+        ('IsImage', bool),
+        ('ResizeLongestDimension', int)
+    )
+
+    def _prefill_args(self):
+        return {
+            'GUID': self.client.guid,
+            'Password': self.client.password,
+            'ResizeLongestDimension': 0
+        }
+
+    def make_request(self, *args, **kwargs):
+        return AttachFileRequest(self, args, kwargs)
+
+
+class AttachFileRequest(FunctionRequest):
+    def _parse_response(self, response):
+        guid, junk, message = str(response).split('|', 2)
+        return guid, int(junk), message
+
+
+class UpdateDefaultImage(Function):
+    _signature = (
+        ('GUID', str),
+        ('Password', str),
+        ('PageID', int),
+        ('RecordID', int),
+        ('UniqueName', str)
+    )
+
+    def _prefill_args(self):
+        return {
+            'GUID': self.client.guid,
+            'Password': self.client.password
+        }
+
+    def make_request(self, *args, **kwargs):
+        return UpdateDefaultImageRequest(self, args, kwargs)
+
+
+class UpdateDefaultImageRequest(FunctionRequest):
+    def _parse_response(self, response):
+        guid, junk, message = str(response).split('|', 2)
+        if guid == '0':
+            raise exc.UpdateDefaultImageError(message)
+        return guid, int(junk), message
 
 
 class ExecuteStoredProcedure(Function):
@@ -196,7 +282,7 @@ class ExecuteStoredProcedure(Function):
         ('GUID', str),
         ('Password', str),
         ('StoredProcedureName', str),
-        ('RequestString', str)
+        ('RequestString', _make_request_string)
     )
 
     def _prefill_args(self):
@@ -213,6 +299,11 @@ class ExecuteStoredProcedureRequest(FunctionRequest):
     def _parse_response(self, response):
         return ExecuteStoredProcedureResponse(self, response)
 
+    def __repr__(self):
+        return "<pymple.function.ExecuteStoredProcedureRequest(%s)>" % (
+            self.kwargs.get('StoredProcedureName', 'N/A')
+        )
+
 
 class ExecuteStoredProcedureResponse(object):
     def __init__(self, request, response):
@@ -223,6 +314,11 @@ class ExecuteStoredProcedureResponse(object):
         for i in self._resolver.tables:
             setattr(self, i.lower(), getattr(self._resolver, i))
 
+    def __repr__(self):
+        return "<pymple.function.ExecuteStoredProcedureResponse(%s)>" % (
+            self.request.kwargs.get('StoredProcedureName', 'N/A')
+        )
+
     def __iter__(self):
         for i in self._resolver.tables:
             yield getattr(self._resolver, i)
@@ -232,6 +328,88 @@ class ExecuteStoredProcedureResponse(object):
         for i in self._resolver.tables:
             result[i] = getattr(self._resolver, i)
         return result
+
+
+class FindOrCreateUserAccount(Function):
+    _signature = (
+        ('GUID', str),
+        ('Password', str),
+        ('FirstName', str),
+        ('LastName', str),
+        ('MobilePhone', str),
+        ('EmailAddress', str)
+    )
+
+    def _prefill_args(self):
+        return {
+            'GUID': self.client.guid,
+            'Password': self.client.password
+        }
+
+
+class UpdateUserAccount(Function):
+    _signature = (
+        ('GUID', str),
+        ('Password', str),
+        ('UserID', int),
+        ('FirstName', str),
+        ('LastName', str),
+        ('MobilePhone', str),
+        ('EmailAddress', str),
+        ('NewPassword', str),
+        ('MiddleName', str),
+        ('NickName', str),
+        ('PrefixID', int),
+        ('SuffixID', int),
+        ('DOB', lambda x: x.strftime('%Y-%m-%d') if x else ''),
+        ('GenderID', int),
+        ('MaritalStatusID', int)
+    )
+
+    def _prefill_args(self):
+        return {
+            'GUID': self.client.guid,
+            'Password': self.client.password
+        }
+
+    def make_request(self, *args, **kwargs):
+        return UpdateUserAccountRequest(self, args, kwargs)
+
+
+class UpdateUserAccountRequest(FunctionRequest):
+    def _parse_response(self, response):
+        id_, junk, message = str(response).split('|', 2)
+        if id_ == '0':
+            raise exc.UpdateUserAccountError(message.lstrip('Exception: '))
+        return int(id_), int(junk), message
+
+
+class ResetPassword(Function):
+    _signature = (
+        ('GUID', str),
+        ('Password', str),
+        ('FirstName', str),
+        ('EmailAddress', str)
+    )
+
+    def _prefill_args(self):
+        return {
+            'GUID': self.client.guid,
+            'Password': self.client.password
+        }
+
+    def make_request(self, *args, **kwargs):
+        return ResetPasswordRequest(self, args, kwargs)
+
+
+class ResetPasswordRequest(FunctionRequest):
+    def _parse_response(self, response):
+        parsed_response = FunctionRequest._parse_response(self, response)
+        id_, junk, message = str(
+            parsed_response['ResetPasswordResult']).split('|', 2)
+        if id_ == '0':
+            raise exc.ResetPasswordError(message.lstrip('Exception: '))
+        return parsed_response
 
 
 class FunctionRegistry(object):
@@ -247,3 +425,6 @@ class FunctionRegistry(object):
             except KeyError:
                 raise AttributeError(name)
         return self._cache[name]
+
+    def __repr__(self):
+        return "<pymple.function.FunctionRegistry>"
