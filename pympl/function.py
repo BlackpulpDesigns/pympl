@@ -25,6 +25,9 @@ class FunctionMeta(type):
 
 
 class Function(object):
+    """
+    The base Function class that all of the others inherit from.
+    """
     __metaclass__ = FunctionMeta
 
     _signature = tuple()
@@ -40,6 +43,10 @@ class Function(object):
         return "<pymple.function.%s>" % type(self).__name__
 
     def make_request(self, *args, **kwargs):
+        """
+        Creates and returns a request object for the function. This method is
+        often overridden by specific functions to augment behavior.
+        """
         return FunctionRequest(self, args, kwargs)
 
     def _prepare_args(self, args, kwargs):
@@ -104,6 +111,41 @@ class FunctionRequest(object):
 
 
 class AddRecord(Function):
+    """
+    Adds a record to a Ministry Platform table. Please note that it's
+    generally easier to use the :obj:`pympl.Client.table` attribute to access
+    a table object and create/update records via that mechanism.
+
+
+    .. method:: __call__(TableName, PrimaryKeyField, RequestString)
+
+       :param str TableName: The name of the Ministry Platform table to add a
+           record to
+
+       :param str PrimaryKeyField: The primary key field name of the table that
+          you want to add a record to. This is typically the singular form of
+          the table name, suffixed with ``_ID``. For example, if you wanted to
+          add a record to the ``Contacts`` table, the primary key field would
+          be ``Contact_ID``.
+
+       :param str|dict|RequestString RequestString: Either an instance of
+          :class:`pympl.RequestString` or a manually-formatted Ministry
+          Platform request string. See the Ministry Platform documentation on
+          request strings if you want to perform the formatting yourself.
+          Alternatively, you can also pass a :class:`dict` as the request
+          string and it will be converted to a ``RequestString`` object and
+          used that way.
+
+       Performs the API call. For example, if you wanted to add a record to the
+       ``Contacts`` table, one might do something like the following::
+
+         client.fn.AddRecord('Contacts', 'Contact_ID', {
+             'Display_Name': 'Smith, John',
+             'Email_Address': 'johnsmith@thesmiths.com',
+             'First_Name': 'John',
+             'Last_Name': 'Smith'
+         })
+    """
     _signature = (
         ('GUID', str),
         ('Password', str),
@@ -388,6 +430,34 @@ class ResetPasswordRequest(FunctionRequest):
 
 
 class FunctionRegistry(object):
+    """
+    A simple object that facilitates instantiating function objects. Accessing
+    an attribute of the function registry will return an instantiated function
+    object, which can be used to query Ministry Platform::
+
+      # A function registry is always instantiated at Client.fn
+      function_instance = client.fn.AuthenticateUser
+
+    Functions are callables. Calling them will call Ministry Platform with
+    the parameters specified::
+
+      response = function_instance('username', 'password')
+
+    For specific information about the various functions, the parameters
+    they receive and the objects they return, please reference the various
+    ``Function`` class docs:
+
+    * :class:`AddRecord <pympl.function.AddRecord>`
+    * :class:`UpdateRecord <pympl.function.UpdateRecord>`
+    * :class:`AuthenticateUser <pympl.function.AuthenticateUser>`
+    * :class:`GetUserInfo <pympl.function.GetUserInfo>`
+    * :class:`AttachFile <pympl.function.AttachFile>`
+    * :class:`UpdateDefaultImage <pympl.function.UpdateDefaultImage>`
+    * :class:`ExecuteStoredProcedure <pympl.function.ExecuteStoredProcedure>`
+    * :class:`FindOrCreateUserAccount <pympl.function.FindOrCreateUserAccount>`
+    * :class:`UpdateUserAccount <pympl.function.UpdateUserAccount>`
+    * :class:`ResetPassword <pympl.function.ResetPassword>`
+    """
     _cache = {}
 
     def __init__(self, client):

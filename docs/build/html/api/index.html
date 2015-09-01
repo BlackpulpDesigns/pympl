@@ -71,7 +71,12 @@
           
           
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#core-classes">Core Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#soap-functions">SOAP Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exceptions">Exceptions</a></li>
+</ul>
+</li>
 </ul>
 
           
@@ -111,11 +116,225 @@
             
   <div class="section" id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="core-classes">
+<h2>Core Classes<a class="headerlink" href="#core-classes" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pympl.Client">
 <em class="property">class </em><code class="descclassname">pympl.</code><code class="descname">Client</code><span class="sig-paren">(</span><em>wsdl=None</em>, <em>guid=None</em>, <em>password=None</em>, <em>server_name=None</em>, <em>user_id=0</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.Client" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The central object for interacting with a specific Ministry Platform
+server. Clients can be instantiated in the traditional pattern, such as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="s">&#39;https://path/to/wsdl&#39;</span><span class="p">,</span> <span class="n">guid</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">server_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or, alternatively, you can place a <cite>.pympl</cite> file in your application&#8217;s
+directory and specify configuration parameters in that. This file is INI
+formatted. An example looks like:</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[pympl]</span>
+<span class="na">wsgi</span> <span class="o">=</span> <span class="s">http://path/to/wsdl</span>
+<span class="na">guid</span> <span class="o">=</span> <span class="s">your_guid</span>
+<span class="na">password</span> <span class="o">=</span> <span class="s">your_password</span>
+<span class="na">server_name</span> <span class="o">=</span> <span class="s">your_server_name</span>
+</pre></div>
+</div>
+<p>If a <code class="docutils literal"><span class="pre">.pympl</span></code> file is found upon <code class="docutils literal"><span class="pre">Client</span></code> instantiation, it will be
+used for fallback parameters. This allows you to instantiate the client
+more simply:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>wsdl</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The URL of the Ministry Platform WSDL.</li>
+<li><strong>guid</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The Ministry Platform API GUID to connect with.</li>
+<li><strong>password</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The API password to use.</li>
+<li><strong>server_name</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the Ministry Platform server.</li>
+<li><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The default user ID to use for API calls.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="Client.fn">
+<code class="descname">fn</code><a class="headerlink" href="#Client.fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of <a class="reference internal" href="#pympl.function.FunctionRegistry" title="pympl.function.FunctionRegistry"><code class="xref py py-class docutils literal"><span class="pre">pympl.function.FunctionRegistry</span></code></a>. This object
+is used for initiating Ministry Platform SOAP function calls. For
+example, if one wants to call the MP function <cite>AuthenticateUser</cite>, the
+following can be done:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">AuthenticateUser</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the instance of <cite>AuthenticateUser</cite>, a dictionary will be returned.
+Or, if an error occurred, a <a class="reference internal" href="#pympl.exc.FunctionError" title="pympl.exc.FunctionError"><code class="xref py py-class docutils literal"><span class="pre">pympl.exc.FunctionError</span></code></a>
+will be thrown.</p>
+</dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.RequestString">
+<em class="property">class </em><code class="descclassname">pympl.</code><code class="descname">RequestString</code><a class="reference internal" href="../_modules/pympl/requeststring.html#RequestString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.RequestString" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple class for creating properly-encoded Ministry Platform request
+strings. This is really just a standard <a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a> with a custom
+<code class="docutils literal"><span class="pre">__str__()</span></code> method, which farms out the encoding.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="soap-functions">
+<h2>SOAP Functions<a class="headerlink" href="#soap-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pympl.function.FunctionRegistry">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">FunctionRegistry</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#FunctionRegistry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.FunctionRegistry" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple object that facilitates instantiating function objects. Accessing
+an attribute of the function registry will return an instantiated function
+object, which can be used to query Ministry Platform:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># A function registry is always instantiated at Client.fn</span>
+<span class="n">function_instance</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">AuthenticateUser</span>
+</pre></div>
+</div>
+<p>Functions are callables. Calling them will call Ministry Platform with
+the parameters specified:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">response</span> <span class="o">=</span> <span class="n">function_instance</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For specific information about the various functions, the parameters
+they receive and the objects they return, please reference the various
+<code class="docutils literal"><span class="pre">Function</span></code> class docs:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#pympl.function.AddRecord" title="pympl.function.AddRecord"><code class="xref py py-class docutils literal"><span class="pre">AddRecord</span></code></a></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">UpdateRecord</span></code></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">AuthenticateUser</span></code></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">GetUserInfo</span></code></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">AttachFile</span></code></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">UpdateDefaultImage</span></code></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">ExecuteStoredProcedure</span></code></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">FindOrCreateUserAccount</span></code></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">UpdateUserAccount</span></code></li>
+<li><code class="xref py py-class docutils literal"><span class="pre">ResetPassword</span></code></li>
+</ul>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.Function">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">Function</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#Function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.Function" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base Function class that all of the others inherit from.</p>
+<dl class="method">
+<dt id="pympl.function.Function.make_request">
+<code class="descname">make_request</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#Function.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.Function.make_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates and returns a request object for the function. This method is
+often overridden by specific functions to augment behavior.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.AddRecord">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">AddRecord</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#AddRecord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.AddRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a record to a Ministry Platform table. Please note that it&#8217;s
+generally easier to use the <code class="xref py py-obj docutils literal"><span class="pre">pympl.Client.table</span></code> attribute to access
+a table object and create/update records via that mechanism.</p>
+<dl class="method">
+<dt id="AddRecord.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>TableName</em>, <em>PrimaryKeyField</em>, <em>RequestString</em><span class="sig-paren">)</span><a class="headerlink" href="#AddRecord.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>TableName</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the Ministry Platform table to add a
+record to</li>
+<li><strong>PrimaryKeyField</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The primary key field name of the table that
+you want to add a record to. This is typically the singular form of
+the table name, suffixed with <code class="docutils literal"><span class="pre">_ID</span></code>. For example, if you wanted to
+add a record to the <code class="docutils literal"><span class="pre">Contacts</span></code> table, the primary key field would
+be <code class="docutils literal"><span class="pre">Contact_ID</span></code>.</li>
+<li><strong>RequestString</strong> (<em>str|dict|RequestString</em>) &#8211; Either an instance of
+<a class="reference internal" href="#pympl.RequestString" title="pympl.RequestString"><code class="xref py py-class docutils literal"><span class="pre">pympl.RequestString</span></code></a> or a manually-formatted Ministry
+Platform request string. See the Ministry Platform documentation on
+request strings if you want to perform the formatting yourself.
+Alternatively, you can also pass a <a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a> as the request
+string and it will be converted to a <code class="docutils literal"><span class="pre">RequestString</span></code> object and
+used that way.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Performs the API call. For example, if you wanted to add a record to the
+<code class="docutils literal"><span class="pre">Contacts</span></code> table, one might do something like the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">AddRecord</span><span class="p">(</span><span class="s">&#39;Contacts&#39;</span><span class="p">,</span> <span class="s">&#39;Contact_ID&#39;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s">&#39;Display_Name&#39;</span><span class="p">:</span> <span class="s">&#39;Smith, John&#39;</span><span class="p">,</span>
+    <span class="s">&#39;Email_Address&#39;</span><span class="p">:</span> <span class="s">&#39;johnsmith@thesmiths.com&#39;</span><span class="p">,</span>
+    <span class="s">&#39;First_Name&#39;</span><span class="p">:</span> <span class="s">&#39;John&#39;</span><span class="p">,</span>
+    <span class="s">&#39;Last_Name&#39;</span><span class="p">:</span> <span class="s">&#39;Smith&#39;</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pympl.exc.PymplError">
+<em class="property">class </em><code class="descclassname">pympl.exc.</code><code class="descname">PymplError</code><a class="reference internal" href="../_modules/pympl/exc.html#PymplError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.exc.PymplError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/exceptions.html#exceptions.Exception" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.exc.ServerError">
+<em class="property">class </em><code class="descclassname">pympl.exc.</code><code class="descname">ServerError</code><a class="reference internal" href="../_modules/pympl/exc.html#ServerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.exc.ServerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pympl.exc.PymplError" title="pympl.exc.PymplError"><code class="xref py py-class docutils literal"><span class="pre">pympl.exc.PymplError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.exc.ResolverError">
+<em class="property">class </em><code class="descclassname">pympl.exc.</code><code class="descname">ResolverError</code><a class="reference internal" href="../_modules/pympl/exc.html#ResolverError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.exc.ResolverError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pympl.exc.ServerError" title="pympl.exc.ServerError"><code class="xref py py-class docutils literal"><span class="pre">pympl.exc.ServerError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.exc.FunctionError">
+<em class="property">class </em><code class="descclassname">pympl.exc.</code><code class="descname">FunctionError</code><a class="reference internal" href="../_modules/pympl/exc.html#FunctionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.exc.FunctionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pympl.exc.ServerError" title="pympl.exc.ServerError"><code class="xref py py-class docutils literal"><span class="pre">pympl.exc.ServerError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.exc.AddRecordError">
+<em class="property">class </em><code class="descclassname">pympl.exc.</code><code class="descname">AddRecordError</code><a class="reference internal" href="../_modules/pympl/exc.html#AddRecordError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.exc.AddRecordError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pympl.exc.FunctionError" title="pympl.exc.FunctionError"><code class="xref py py-class docutils literal"><span class="pre">pympl.exc.FunctionError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.exc.UpdateRecordError">
+<em class="property">class </em><code class="descclassname">pympl.exc.</code><code class="descname">UpdateRecordError</code><a class="reference internal" href="../_modules/pympl/exc.html#UpdateRecordError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.exc.UpdateRecordError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pympl.exc.FunctionError" title="pympl.exc.FunctionError"><code class="xref py py-class docutils literal"><span class="pre">pympl.exc.FunctionError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.exc.UpdateDefaultImageError">
+<em class="property">class </em><code class="descclassname">pympl.exc.</code><code class="descname">UpdateDefaultImageError</code><a class="reference internal" href="../_modules/pympl/exc.html#UpdateDefaultImageError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.exc.UpdateDefaultImageError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pympl.exc.FunctionError" title="pympl.exc.FunctionError"><code class="xref py py-class docutils literal"><span class="pre">pympl.exc.FunctionError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.exc.UpdateUserAccountError">
+<em class="property">class </em><code class="descclassname">pympl.exc.</code><code class="descname">UpdateUserAccountError</code><a class="reference internal" href="../_modules/pympl/exc.html#UpdateUserAccountError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.exc.UpdateUserAccountError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pympl.exc.FunctionError" title="pympl.exc.FunctionError"><code class="xref py py-class docutils literal"><span class="pre">pympl.exc.FunctionError</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.exc.ResetPasswordError">
+<em class="property">class </em><code class="descclassname">pympl.exc.</code><code class="descname">ResetPasswordError</code><a class="reference internal" href="../_modules/pympl/exc.html#ResetPasswordError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.exc.ResetPasswordError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pympl.exc.FunctionError" title="pympl.exc.FunctionError"><code class="xref py py-class docutils literal"><span class="pre">pympl.exc.FunctionError</span></code></a></p>
+</dd></dl>
+
+</div>
 </div>
 
 

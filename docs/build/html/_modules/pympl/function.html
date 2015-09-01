@@ -1,0 +1,651 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pympl.function &mdash; pympl 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="pympl 0.1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../../index.html" class="icon icon-home"> pympl
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#core-classes">Core Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#soap-functions">SOAP Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#exceptions">Exceptions</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">pympl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pympl.function</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <h1>Source code for pympl.function</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">pympl.requeststring</span> <span class="kn">import</span> <span class="n">RequestString</span>
+<span class="kn">from</span> <span class="nn">pympl.resolvers</span> <span class="kn">import</span> <span class="n">SchemaResolver</span>
+<span class="kn">import</span> <span class="nn">pympl.exc</span> <span class="kn">as</span> <span class="nn">exc</span>
+<span class="kn">from</span> <span class="nn">suds.sax.text</span> <span class="kn">import</span> <span class="n">Text</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+
+
+<span class="n">_functions</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<span class="k">def</span> <span class="nf">_make_request_string</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">string</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">string</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">)</span> <span class="k">else</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">RequestString</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">FunctionMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dict_</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s">&#39;Function&#39;</span><span class="p">:</span>
+            <span class="n">_functions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls</span>
+        <span class="nb">type</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dict_</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Function"><a class="viewcode-back" href="../../api/index.html#pympl.function.Function">[docs]</a><span class="k">class</span> <span class="nc">Function</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The base Function class that all of the others inherit from.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">FunctionMeta</span>
+
+    <span class="n">_signature</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">call</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;pymple.function.</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span>
+
+<div class="viewcode-block" id="Function.make_request"><a class="viewcode-back" href="../../api/index.html#pympl.function.Function.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates and returns a request object for the function. This method is</span>
+<span class="sd">        often overridden by specific functions to augment behavior.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">FunctionRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_prepare_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">all_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">all_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_prefill_args</span><span class="p">())</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_encode_args</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_kwargs</span><span class="p">(</span><span class="n">all_kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_encode_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="n">encoded_args</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="n">encoded_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">arg</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signature</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">](</span><span class="n">arg</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">encoded_args</span>
+
+    <span class="k">def</span> <span class="nf">_encode_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">encoded_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">type_</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signature</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">encoded_kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s">&#39;&#39;</span> <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span>
+                    <span class="n">type_</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">])</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">encoded_kwargs</span>
+
+</div>
+<span class="k">class</span> <span class="nc">GuidPasswordPrefill</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_prefill_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;GUID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span>
+            <span class="s">&#39;Password&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">password</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">FunctionRequest</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;pymple.function.</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">function_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_suds</span><span class="o">.</span><span class="n">service</span><span class="p">,</span> <span class="n">function_name</span><span class="p">)</span>
+        <span class="n">prepped_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_response</span><span class="p">(</span>
+            <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">prepped_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">prepped_args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_suds</span><span class="o">.</span><span class="n">dict</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Text</span><span class="p">):</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="AddRecord"><a class="viewcode-back" href="../../api/index.html#pympl.function.AddRecord">[docs]</a><span class="k">class</span> <span class="nc">AddRecord</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a record to a Ministry Platform table. Please note that it&#39;s</span>
+<span class="sd">    generally easier to use the :obj:`pympl.Client.table` attribute to access</span>
+<span class="sd">    a table object and create/update records via that mechanism.</span>
+
+
+<span class="sd">    .. method:: __call__(TableName, PrimaryKeyField, RequestString)</span>
+
+<span class="sd">       :param str TableName: The name of the Ministry Platform table to add a</span>
+<span class="sd">           record to</span>
+
+<span class="sd">       :param str PrimaryKeyField: The primary key field name of the table that</span>
+<span class="sd">          you want to add a record to. This is typically the singular form of</span>
+<span class="sd">          the table name, suffixed with ``_ID``. For example, if you wanted to</span>
+<span class="sd">          add a record to the ``Contacts`` table, the primary key field would</span>
+<span class="sd">          be ``Contact_ID``.</span>
+
+<span class="sd">       :param str|dict|RequestString RequestString: Either an instance of</span>
+<span class="sd">          :class:`pympl.RequestString` or a manually-formatted Ministry</span>
+<span class="sd">          Platform request string. See the Ministry Platform documentation on</span>
+<span class="sd">          request strings if you want to perform the formatting yourself.</span>
+<span class="sd">          Alternatively, you can also pass a :class:`dict` as the request</span>
+<span class="sd">          string and it will be converted to a ``RequestString`` object and</span>
+<span class="sd">          used that way.</span>
+
+<span class="sd">       Performs the API call. For example, if you wanted to add a record to the</span>
+<span class="sd">       ``Contacts`` table, one might do something like the following::</span>
+
+<span class="sd">         client.fn.AddRecord(&#39;Contacts&#39;, &#39;Contact_ID&#39;, {</span>
+<span class="sd">             &#39;Display_Name&#39;: &#39;Smith, John&#39;,</span>
+<span class="sd">             &#39;Email_Address&#39;: &#39;johnsmith@thesmiths.com&#39;,</span>
+<span class="sd">             &#39;First_Name&#39;: &#39;John&#39;,</span>
+<span class="sd">             &#39;Last_Name&#39;: &#39;Smith&#39;</span>
+<span class="sd">         })</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;UserID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;TableName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;PrimaryKeyField&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;RequestString&#39;</span><span class="p">,</span> <span class="n">_make_request_string</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prefill_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;GUID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span>
+            <span class="s">&#39;Password&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+            <span class="s">&#39;UserID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">user_id</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">AddRecordRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<span class="k">class</span> <span class="nc">AddRecordRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">id_</span><span class="p">,</span> <span class="n">junk</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">id_</span> <span class="o">==</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">AddRecordError</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;Exception: &#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">id_</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">junk</span><span class="p">),</span> <span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">UpdateRecord</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;UserID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;TableName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;PrimaryKeyField&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;RequestString&#39;</span><span class="p">,</span> <span class="n">_make_request_string</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prefill_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;GUID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span>
+            <span class="s">&#39;Password&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+            <span class="s">&#39;UserID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">user_id</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">UpdateRecordRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">UpdateRecordRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">id_</span><span class="p">,</span> <span class="n">junk</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">id_</span> <span class="o">==</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">UpdateRecordError</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;Exception: &#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">id_</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">junk</span><span class="p">),</span> <span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">AuthenticateUser</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;UserName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;ServerName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prefill_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;ServerName&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">server_name</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">GetUserInfo</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;UserID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prefill_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;GUID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span>
+            <span class="s">&#39;Password&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">password</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">GetUserInfoRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">GetUserInfoRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">GetUserInfoResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">GetUserInfoResponse</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="n">request</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">response</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span> <span class="o">=</span> <span class="n">SchemaResolver</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">diffgram</span><span class="p">)</span>
+
+        <span class="c"># Create some funsies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contact</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">Contacts</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">first</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">dp_User</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">Table1</span><span class="o">.</span><span class="n">first</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefixes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">Table2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">suffixes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">Table3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">genders</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">Table4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">marital_statuses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">Table5</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;pymple.function.GetUserInfoResponse(</span><span class="si">%s</span><span class="s">)&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;User_Name&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_encode_file_contents</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;read&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;base64&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;base64&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">AttachFile</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;FileContents&#39;</span><span class="p">,</span> <span class="n">_encode_file_contents</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;FileName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;PageID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;RecordID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;FileDescription&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;IsImage&#39;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;ResizeLongestDimension&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prefill_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;GUID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span>
+            <span class="s">&#39;Password&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+            <span class="s">&#39;ResizeLongestDimension&#39;</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">AttachFileRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">AttachFileRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">guid</span><span class="p">,</span> <span class="n">junk</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">guid</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">junk</span><span class="p">),</span> <span class="n">message</span>
+
+
+<span class="k">class</span> <span class="nc">UpdateDefaultImage</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">GuidPasswordPrefill</span><span class="p">):</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;PageID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;RecordID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;UniqueName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">UpdateDefaultImageRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">UpdateDefaultImageRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">guid</span><span class="p">,</span> <span class="n">junk</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">guid</span> <span class="o">==</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">UpdateDefaultImageError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">guid</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">junk</span><span class="p">),</span> <span class="n">message</span>
+
+
+<span class="k">class</span> <span class="nc">ExecuteStoredProcedure</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">GuidPasswordPrefill</span><span class="p">):</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;StoredProcedureName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;RequestString&#39;</span><span class="p">,</span> <span class="n">_make_request_string</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ExecuteStoredProcedureRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ExecuteStoredProcedureRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ExecuteStoredProcedureResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;pymple.function.ExecuteStoredProcedureRequest(</span><span class="si">%s</span><span class="s">)&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;StoredProcedureName&#39;</span><span class="p">,</span> <span class="s">&#39;N/A&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ExecuteStoredProcedureResponse</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="n">request</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">response</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span> <span class="o">=</span> <span class="n">SchemaResolver</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">diffgram</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;pymple.function.ExecuteStoredProcedureResponse(</span><span class="si">%s</span><span class="s">)&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;StoredProcedureName&#39;</span><span class="p">,</span> <span class="s">&#39;N/A&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">class</span> <span class="nc">FindOrCreateUserAccount</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">GuidPasswordPrefill</span><span class="p">):</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;FirstName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;LastName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;MobilePhone&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;EmailAddress&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">UpdateUserAccount</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">GuidPasswordPrefill</span><span class="p">):</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;UserID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;FirstName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;LastName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;MobilePhone&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;EmailAddress&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;NewPassword&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;MiddleName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;NickName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;PrefixID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;SuffixID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;DOB&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;GenderID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;MaritalStatusID&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">UpdateUserAccountRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">UpdateUserAccountRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">id_</span><span class="p">,</span> <span class="n">junk</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">id_</span> <span class="o">==</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">UpdateUserAccountError</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;Exception: &#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">id_</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">junk</span><span class="p">),</span> <span class="n">message</span>
+
+
+<span class="k">class</span> <span class="nc">ResetPassword</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">GuidPasswordPrefill</span><span class="p">):</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;FirstName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;EmailAddress&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ResetPasswordRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ResetPasswordRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">parsed_response</span> <span class="o">=</span> <span class="n">FunctionRequest</span><span class="o">.</span><span class="n">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+        <span class="n">id_</span><span class="p">,</span> <span class="n">junk</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="n">parsed_response</span><span class="p">[</span><span class="s">&#39;ResetPasswordResult&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">id_</span> <span class="o">==</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">ResetPasswordError</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;Exception: &#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">parsed_response</span>
+
+
+<div class="viewcode-block" id="FunctionRegistry"><a class="viewcode-back" href="../../api/index.html#pympl.function.FunctionRegistry">[docs]</a><span class="k">class</span> <span class="nc">FunctionRegistry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple object that facilitates instantiating function objects. Accessing</span>
+<span class="sd">    an attribute of the function registry will return an instantiated function</span>
+<span class="sd">    object, which can be used to query Ministry Platform::</span>
+
+<span class="sd">      # A function registry is always instantiated at Client.fn</span>
+<span class="sd">      function_instance = client.fn.AuthenticateUser</span>
+
+<span class="sd">    Functions are callables. Calling them will call Ministry Platform with</span>
+<span class="sd">    the parameters specified::</span>
+
+<span class="sd">      response = function_instance(&#39;username&#39;, &#39;password&#39;)</span>
+
+<span class="sd">    For specific information about the various functions, the parameters</span>
+<span class="sd">    they receive and the objects they return, please reference the various</span>
+<span class="sd">    ``Function`` class docs:</span>
+
+<span class="sd">    * :class:`AddRecord &lt;pympl.function.AddRecord&gt;`</span>
+<span class="sd">    * :class:`UpdateRecord &lt;pympl.function.UpdateRecord&gt;`</span>
+<span class="sd">    * :class:`AuthenticateUser &lt;pympl.function.AuthenticateUser&gt;`</span>
+<span class="sd">    * :class:`GetUserInfo &lt;pympl.function.GetUserInfo&gt;`</span>
+<span class="sd">    * :class:`AttachFile &lt;pympl.function.AttachFile&gt;`</span>
+<span class="sd">    * :class:`UpdateDefaultImage &lt;pympl.function.UpdateDefaultImage&gt;`</span>
+<span class="sd">    * :class:`ExecuteStoredProcedure &lt;pympl.function.ExecuteStoredProcedure&gt;`</span>
+<span class="sd">    * :class:`FindOrCreateUserAccount &lt;pympl.function.FindOrCreateUserAccount&gt;`</span>
+<span class="sd">    * :class:`UpdateUserAccount &lt;pympl.function.UpdateUserAccount&gt;`</span>
+<span class="sd">    * :class:`ResetPassword &lt;pympl.function.ResetPassword&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_functions</span><span class="p">[</span><span class="n">name</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;pymple.function.FunctionRegistry&gt;&quot;</span></div>
+</pre></div>
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Tim Radke.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

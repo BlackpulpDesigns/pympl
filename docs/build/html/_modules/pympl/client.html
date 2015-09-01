@@ -71,7 +71,12 @@
           
           
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#core-classes">Core Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#soap-functions">SOAP Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#exceptions">Exceptions</a></li>
+</ul>
+</li>
 </ul>
 
           
@@ -136,10 +141,56 @@
 
 
 <div class="viewcode-block" id="Client"><a class="viewcode-back" href="../../api/index.html#pympl.Client">[docs]</a><span class="k">class</span> <span class="nc">Client</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The central object for interacting with a specific Ministry Platform</span>
+<span class="sd">    server. Clients can be instantiated in the traditional pattern, such as::</span>
+
+<span class="sd">      client = Client(&#39;https://path/to/wsdl&#39;, guid, password, server_name)</span>
+
+<span class="sd">    Or, alternatively, you can place a `.pympl` file in your application&#39;s</span>
+<span class="sd">    directory and specify configuration parameters in that. This file is INI</span>
+<span class="sd">    formatted. An example looks like:</span>
+
+<span class="sd">    .. code-block:: ini</span>
+
+<span class="sd">       [pympl]</span>
+<span class="sd">       wsgi = http://path/to/wsdl</span>
+<span class="sd">       guid = your_guid</span>
+<span class="sd">       password = your_password</span>
+<span class="sd">       server_name = your_server_name</span>
+
+<span class="sd">    If a ``.pympl`` file is found upon ``Client`` instantiation, it will be</span>
+<span class="sd">    used for fallback parameters. This allows you to instantiate the client</span>
+<span class="sd">    more simply::</span>
+
+<span class="sd">      client = Client()</span>
+
+<span class="sd">    :param str wsdl: The URL of the Ministry Platform WSDL.</span>
+<span class="sd">    :param str guid: The Ministry Platform API GUID to connect with.</span>
+<span class="sd">    :param str password: The API password to use.</span>
+<span class="sd">    :param str server_name: The name of the Ministry Platform server.</span>
+<span class="sd">    :param int user_id: The default user ID to use for API calls.</span>
+
+
+<span class="sd">    .. attribute:: fn</span>
+
+<span class="sd">       An instance of :class:`pympl.function.FunctionRegistry`. This object</span>
+<span class="sd">       is used for initiating Ministry Platform SOAP function calls. For</span>
+<span class="sd">       example, if one wants to call the MP function `AuthenticateUser`, the</span>
+<span class="sd">       following can be done::</span>
+
+<span class="sd">         response = client.fn.AuthenticateUser(&#39;username&#39;, &#39;password&#39;)</span>
+
+<span class="sd">       In the instance of `AuthenticateUser`, a dictionary will be returned.</span>
+<span class="sd">       Or, if an error occurred, a :class:`pympl.exc.FunctionError`</span>
+<span class="sd">       will be thrown.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">wsdl</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">guid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">server_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
             <span class="n">user_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span> <span class="o">=</span> <span class="n">_load_config_file</span><span class="p">()</span>
+
+        <span class="c">#: The URL of the WSDL</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wsdl</span> <span class="o">=</span> <span class="n">wsdl</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;pympl&#39;</span><span class="p">,</span> <span class="s">&#39;wsdl&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">guid</span> <span class="o">=</span> <span class="n">guid</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;pympl&#39;</span><span class="p">,</span> <span class="s">&#39;guid&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;pympl&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
