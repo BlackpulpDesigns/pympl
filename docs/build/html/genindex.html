@@ -72,8 +72,19 @@
           
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/index.html#core-classes">Core Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/index.html#soap-functions">SOAP Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#mainstream-classes">&#8220;Mainstream&#8221; Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#the-client-object">The Client Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#request-string-objects">Request String Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#table-objects">Table Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/index.html#low-er-level-soap-api">Low(er)-level SOAP API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#soap-function-request-and-response-types">SOAP Function Request and Response Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#function-request-objects">Function Request Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/index.html#function-response-objects">Function Response Objects</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="api/index.html#exceptions">Exceptions</a></li>
 </ul>
 </li>
@@ -119,11 +130,15 @@
  <a href="#_"><strong>_</strong></a>
  | <a href="#A"><strong>A</strong></a>
  | <a href="#C"><strong>C</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  
 </div>
@@ -131,9 +146,15 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="api/index.html#AddRecord.__call__">__call__() (AddRecord method)</a>
+  <dt><a href="api/index.html#pympl.function.Function.__call__">__call__() (pympl.function.Function method)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="api/index.html#pympl.table.Table.__call__">(pympl.table.Table method)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -144,10 +165,34 @@
   <dt><a href="api/index.html#pympl.function.AddRecord">AddRecord (class in pympl.function)</a>
   </dt>
 
+      
+  <dt><a href="api/index.html#pympl.exc.AddRecordError">AddRecordError (class in pympl.exc)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.function.AddRecordRequest">AddRecordRequest (class in pympl.function)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.function.ExecuteStoredProcedureResponse.as_dict">as_dict() (pympl.function.ExecuteStoredProcedureResponse method)</a>
+  </dt>
+
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="api/index.html#pympl.exc.AddRecordError">AddRecordError (class in pympl.exc)</a>
+  <dt><a href="api/index.html#pympl.table.Record.as_request_string">as_request_string() (pympl.table.Record method)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.function.AttachFile">AttachFile (class in pympl.function)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.function.AttachFileRequest">AttachFileRequest (class in pympl.function)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.function.AuthenticateUser">AuthenticateUser (class in pympl.function)</a>
   </dt>
 
   </dl></td>
@@ -157,7 +202,37 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="api/index.html#pympl.function.FunctionRequest.call">call() (pympl.function.FunctionRequest method)</a>
+  </dt>
+
+      
   <dt><a href="api/index.html#pympl.Client">Client (class in pympl)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#GetUserInfoResponse.contact">contact (GetUserInfoResponse attribute)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#pympl.function.ExecuteStoredProcedure">ExecuteStoredProcedure (class in pympl.function)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.function.ExecuteStoredProcedureRequest">ExecuteStoredProcedureRequest (class in pympl.function)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#pympl.function.ExecuteStoredProcedureResponse">ExecuteStoredProcedureResponse (class in pympl.function)</a>
   </dt>
 
   </dl></td>
@@ -174,14 +249,42 @@
   <dt><a href="api/index.html#pympl.function.Function">Function (class in pympl.function)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="api/index.html#pympl.exc.FunctionError">FunctionError (class in pympl.exc)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="api/index.html#pympl.function.FunctionRegistry">FunctionRegistry (class in pympl.function)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.function.FunctionRequest">FunctionRequest (class in pympl.function)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#GetUserInfoResponse.genders">genders (GetUserInfoResponse attribute)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.function.GetUserInfo">GetUserInfo (class in pympl.function)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#pympl.function.GetUserInfoRequest">GetUserInfoRequest (class in pympl.function)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.function.GetUserInfoResponse">GetUserInfoResponse (class in pympl.function)</a>
   </dt>
 
   </dl></td>
@@ -191,7 +294,49 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="api/index.html#pympl.function.Function.make_request">make_request() (pympl.function.Function method)</a>
+  <dt><a href="api/index.html#AuthenticateUser.make_request">make_request() (AuthenticateUser method)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="api/index.html#pympl.function.AddRecord.make_request">(pympl.function.AddRecord method)</a>
+  </dt>
+
+        
+  <dt><a href="api/index.html#pympl.function.AttachFile.make_request">(pympl.function.AttachFile method)</a>
+  </dt>
+
+        
+  <dt><a href="api/index.html#pympl.function.ExecuteStoredProcedure.make_request">(pympl.function.ExecuteStoredProcedure method)</a>
+  </dt>
+
+        
+  <dt><a href="api/index.html#pympl.function.Function.make_request">(pympl.function.Function method)</a>
+  </dt>
+
+        
+  <dt><a href="api/index.html#pympl.function.GetUserInfo.make_request">(pympl.function.GetUserInfo method)</a>
+  </dt>
+
+        
+  <dt><a href="api/index.html#pympl.function.UpdateRecord.make_request">(pympl.function.UpdateRecord method)</a>
+  </dt>
+
+      </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#GetUserInfoResponse.marital_statuses">marital_statuses (GetUserInfoResponse attribute)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#pympl.table.Record.new">new (pympl.table.Record attribute)</a>
   </dt>
 
   </dl></td>
@@ -199,6 +344,12 @@
 
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#GetUserInfoResponse.prefixes">prefixes (GetUserInfoResponse attribute)</a>
+  </dt>
+
+  </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="api/index.html#pympl.exc.PymplError">PymplError (class in pympl.exc)</a>
@@ -211,6 +362,24 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="api/index.html#GetUserInfoResponse.raw">raw (GetUserInfoResponse attribute)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.table.Record">Record (class in pympl.table)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#pympl.table.Table.record">record() (pympl.table.Table method)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#GetUserInfoResponse.request">request (GetUserInfoResponse attribute)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
   <dt><a href="api/index.html#pympl.RequestString">RequestString (class in pympl)</a>
   </dt>
 
@@ -218,8 +387,6 @@
   <dt><a href="api/index.html#pympl.exc.ResetPasswordError">ResetPasswordError (class in pympl.exc)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="api/index.html#pympl.exc.ResolverError">ResolverError (class in pympl.exc)</a>
   </dt>
@@ -231,7 +398,37 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="api/index.html#pympl.table.Record.save">save() (pympl.table.Record method)</a>
+  </dt>
+
+      
   <dt><a href="api/index.html#pympl.exc.ServerError">ServerError (class in pympl.exc)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#Client.sp">sp (Client attribute)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#GetUserInfoResponse.suffixes">suffixes (GetUserInfoResponse attribute)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#pympl.table.Table">Table (class in pympl.table)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api/index.html#Client.table">table (Client attribute)</a>
   </dt>
 
   </dl></td>
@@ -245,13 +442,25 @@
   </dt>
 
       
+  <dt><a href="api/index.html#pympl.function.UpdateRecord">UpdateRecord (class in pympl.function)</a>
+  </dt>
+
+      
   <dt><a href="api/index.html#pympl.exc.UpdateRecordError">UpdateRecordError (class in pympl.exc)</a>
   </dt>
 
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="api/index.html#pympl.function.UpdateRecordRequest">UpdateRecordRequest (class in pympl.function)</a>
+  </dt>
+
+      
   <dt><a href="api/index.html#pympl.exc.UpdateUserAccountError">UpdateUserAccountError (class in pympl.exc)</a>
+  </dt>
+
+      
+  <dt><a href="api/index.html#GetUserInfoResponse.user">user (GetUserInfoResponse attribute)</a>
   </dt>
 
   </dl></td>

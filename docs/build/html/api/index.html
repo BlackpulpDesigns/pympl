@@ -72,8 +72,19 @@
           
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#core-classes">Core Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#soap-functions">SOAP Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mainstream-classes">&#8220;Mainstream&#8221; Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-client-object">The Client Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#request-string-objects">Request String Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#table-objects">Table Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#low-er-level-soap-api">Low(er)-level SOAP API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#soap-function-request-and-response-types">SOAP Function Request and Response Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-request-objects">Function Request Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-response-objects">Function Response Objects</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#exceptions">Exceptions</a></li>
 </ul>
 </li>
@@ -116,8 +127,14 @@
             
   <div class="section" id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="core-classes">
-<h2>Core Classes<a class="headerlink" href="#core-classes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="mainstream-classes">
+<h2>&#8220;Mainstream&#8221; Classes<a class="headerlink" href="#mainstream-classes" title="Permalink to this headline">¶</a></h2>
+<p>Most Ministry Platform operations can be performed easiest by using the
+classes and objects described in this section. That said, some functions
+don&#8217;t have any further abstractions and must be accessed directly from the
+lower-level SOAP function objects.</p>
+<div class="section" id="the-client-object">
+<h3>The Client Object<a class="headerlink" href="#the-client-object" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pympl.Client">
 <em class="property">class </em><code class="descclassname">pympl.</code><code class="descname">Client</code><span class="sig-paren">(</span><em>wsdl=None</em>, <em>guid=None</em>, <em>password=None</em>, <em>server_name=None</em>, <em>user_id=0</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.Client" title="Permalink to this definition">¶</a></dt>
@@ -172,8 +189,30 @@ Or, if an error occurred, a <a class="reference internal" href="#pympl.exc.Funct
 will be thrown.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="Client.sp">
+<code class="descname">sp</code><a class="headerlink" href="#Client.sp" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of <code class="xref py py-class docutils literal"><span class="pre">pympl.storedproc.StoredProcedureFactory</span></code>. This
+object is used for initiating stored procedure calls on the MP
+MSSQL Server instance.</p>
+<p>For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">sp</span><span class="o">.</span><span class="n">api_GetFormResponseById</span><span class="p">(</span><span class="n">ResponseID</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="Client.table">
+<code class="descname">table</code><a class="headerlink" href="#Client.table" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of <code class="xref py py-class docutils literal"><span class="pre">pympl.table.TableFactory</span></code>. Used to easily create
+<a class="reference internal" href="#pympl.table.Table" title="pympl.table.Table"><code class="xref py py-class docutils literal"><span class="pre">Table</span></code></a> objects bound to the client.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="request-string-objects">
+<h3>Request String Objects<a class="headerlink" href="#request-string-objects" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pympl.RequestString">
 <em class="property">class </em><code class="descclassname">pympl.</code><code class="descname">RequestString</code><a class="reference internal" href="../_modules/pympl/requeststring.html#RequestString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.RequestString" title="Permalink to this definition">¶</a></dt>
@@ -183,8 +222,129 @@ strings. This is really just a standard <a class="reference external" href="http
 </dd></dl>
 
 </div>
-<div class="section" id="soap-functions">
-<h2>SOAP Functions<a class="headerlink" href="#soap-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="table-objects">
+<h3>Table Objects<a class="headerlink" href="#table-objects" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pympl.table.Table">
+<em class="property">class </em><code class="descclassname">pympl.table.</code><code class="descname">Table</code><span class="sig-paren">(</span><em>client</em>, <em>name</em>, <em>primary_key=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/table.html#Table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.table.Table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table objects are a simple abstraction that sit on top of pympl&#8217;s SOAP
+function interface. They facilitate interacting with tables and records
+more akin to what you&#8217;d expect from an ORM.</p>
+<p>To instantiate a table object, you should use the <code class="docutils literal"><span class="pre">Client</span></code> object&#8217;s
+<code class="docutils literal"><span class="pre">table</span></code> attribute, as this is an instance of
+<code class="xref py py-class docutils literal"><span class="pre">TableFactory</span></code>. Accessing any
+attribute on the <code class="docutils literal"><span class="pre">TableFactory</span></code> will create a <code class="docutils literal"><span class="pre">Table</span></code> object with that
+attribute&#8217;s name. By default, the primary key field is guessed by taking
+the singular form of the last word of the table&#8217;s name and appending
+<code class="docutils literal"><span class="pre">_ID</span></code> to it.</p>
+<p>For example, if we wanted to get an <code class="docutils literal"><span class="pre">Table</span></code> object for the Contacts
+table, we can simply do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Contacts</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">Contacts</span>
+</pre></div>
+</div>
+<p>This will return a <code class="docutils literal"><span class="pre">Table</span></code> object with the primary key field
+<code class="docutils literal"><span class="pre">Contact_ID</span></code>.</p>
+<p>If the primary key for the table does not follow this convention, you may
+specify it manually like so:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Some_Table</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="s">&#39;Some_Table&#39;</span><span class="p">,</span> <span class="s">&#39;Some_Table_ID&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Once a <code class="docutils literal"><span class="pre">Table</span></code> object is acquired, <a class="reference internal" href="#pympl.table.Record" title="pympl.table.Record"><code class="xref py py-class docutils literal"><span class="pre">Record</span></code></a>
+objects can be created by either calling the <code class="docutils literal"><span class="pre">Table</span></code> object or by
+calling the <code class="docutils literal"><span class="pre">Table</span></code> object&#8217;s <code class="docutils literal"><span class="pre">record()</span></code> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">record</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">Contacts</span><span class="p">(</span><span class="n">First_Name</span><span class="o">=</span><span class="s">&#39;Bob&#39;</span><span class="p">)</span>
+<span class="c"># or, alternatively:</span>
+<span class="n">record2</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">Contacts</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="n">First_Name</span><span class="o">=</span><span class="s">&#39;Bob&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="pympl.table.Table.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/table.html#Table.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.table.Table.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new <a class="reference internal" href="#pympl.table.Record" title="pympl.table.Record"><code class="xref py py-class docutils literal"><span class="pre">Record</span></code></a> object. Any
+keyword arguments passed will be used to initialize the record object
+with data.</p>
+<p>This is calls <a class="reference internal" href="#pympl.table.Table.record" title="pympl.table.Table.record"><code class="xref py py-meth docutils literal"><span class="pre">Table.record()</span></code></a>
+internally.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A new record</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#pympl.table.Record" title="pympl.table.Record"><code class="xref py py-class docutils literal"><span class="pre">Record</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympl.table.Table.record">
+<code class="descname">record</code><span class="sig-paren">(</span><em>*args</em>, <em>**initial_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/table.html#Table.record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.table.Table.record" title="Permalink to this definition">¶</a></dt>
+<dd><p>See documentation for
+<a class="reference internal" href="#pympl.table.Table.__call__" title="pympl.table.Table.__call__"><code class="xref py py-meth docutils literal"><span class="pre">Table.__call__()</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.table.Record">
+<em class="property">class </em><code class="descclassname">pympl.table.</code><code class="descname">Record</code><span class="sig-paren">(</span><em>table</em>, <em>initial_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/table.html#Record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.table.Record" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides an ORM-like interface to Ministry Platform records. These objects
+should almost always be instantiated by utilizing a <code class="docutils literal"><span class="pre">Table</span></code> object,
+generated via <code class="xref py py-attr docutils literal"><span class="pre">pympl.Client.table</span></code>.</p>
+<dl class="method">
+<dt id="pympl.table.Record.as_request_string">
+<code class="descname">as_request_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/table.html#Record.as_request_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.table.Record.as_request_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the data as a <a class="reference internal" href="#pympl.RequestString" title="pympl.RequestString"><code class="xref py py-class docutils literal"><span class="pre">pympl.RequestString</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pympl.table.Record.new">
+<code class="descname">new</code><a class="headerlink" href="#pympl.table.Record.new" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether or not the record all ready has a home in Ministry Platform or
+not. This is determined by checking if the table&#8217;s primary key field
+exists in the record and is truthy.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pympl.table.Record.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>user_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/table.html#Record.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.table.Record.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the record to the database. If the record is &#8220;new&#8221;, then
+<code class="docutils literal"><span class="pre">AddRecord</span></code> is called; otherwise, <code class="docutils literal"><span class="pre">UpdateRecord</span></code> is.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>user_id</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Optionally, one can specify which user should be
+used for the add/update operation. If none is provided, the user
+ID provided to the <code class="docutils literal"><span class="pre">Client</span></code> on initialization will be used
+(if any).</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The response from the database.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/library/functions.html#tuple" title="(in Python v2.7)">tuple</a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference internal" href="#pympl.exc.AddRecordError" title="pympl.exc.AddRecordError"><strong>pympl.exc.AddRecordError</strong></a> &#8211; If new and operation fails.</li>
+<li><a class="reference internal" href="#pympl.exc.UpdateRecordError" title="pympl.exc.UpdateRecordError"><strong>pympl.exc.UpdateRecordError</strong></a> &#8211; If not new and operation fails.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="low-er-level-soap-api">
+<h2>Low(er)-level SOAP API<a class="headerlink" href="#low-er-level-soap-api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="pympl.function.FunctionRegistry">
 <em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">FunctionRegistry</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#FunctionRegistry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.FunctionRegistry" title="Permalink to this definition">¶</a></dt>
@@ -205,12 +365,12 @@ they receive and the objects they return, please reference the various
 <code class="docutils literal"><span class="pre">Function</span></code> class docs:</p>
 <ul class="simple">
 <li><a class="reference internal" href="#pympl.function.AddRecord" title="pympl.function.AddRecord"><code class="xref py py-class docutils literal"><span class="pre">AddRecord</span></code></a></li>
-<li><code class="xref py py-class docutils literal"><span class="pre">UpdateRecord</span></code></li>
-<li><code class="xref py py-class docutils literal"><span class="pre">AuthenticateUser</span></code></li>
-<li><code class="xref py py-class docutils literal"><span class="pre">GetUserInfo</span></code></li>
-<li><code class="xref py py-class docutils literal"><span class="pre">AttachFile</span></code></li>
+<li><a class="reference internal" href="#pympl.function.UpdateRecord" title="pympl.function.UpdateRecord"><code class="xref py py-class docutils literal"><span class="pre">UpdateRecord</span></code></a></li>
+<li><a class="reference internal" href="#pympl.function.AuthenticateUser" title="pympl.function.AuthenticateUser"><code class="xref py py-class docutils literal"><span class="pre">AuthenticateUser</span></code></a></li>
+<li><a class="reference internal" href="#pympl.function.GetUserInfo" title="pympl.function.GetUserInfo"><code class="xref py py-class docutils literal"><span class="pre">GetUserInfo</span></code></a></li>
+<li><a class="reference internal" href="#pympl.function.AttachFile" title="pympl.function.AttachFile"><code class="xref py py-class docutils literal"><span class="pre">AttachFile</span></code></a></li>
 <li><code class="xref py py-class docutils literal"><span class="pre">UpdateDefaultImage</span></code></li>
-<li><code class="xref py py-class docutils literal"><span class="pre">ExecuteStoredProcedure</span></code></li>
+<li><a class="reference internal" href="#pympl.function.ExecuteStoredProcedure" title="pympl.function.ExecuteStoredProcedure"><code class="xref py py-class docutils literal"><span class="pre">ExecuteStoredProcedure</span></code></a></li>
 <li><code class="xref py py-class docutils literal"><span class="pre">FindOrCreateUserAccount</span></code></li>
 <li><code class="xref py py-class docutils literal"><span class="pre">UpdateUserAccount</span></code></li>
 <li><code class="xref py py-class docutils literal"><span class="pre">ResetPassword</span></code></li>
@@ -222,10 +382,41 @@ they receive and the objects they return, please reference the various
 <em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">Function</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#Function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.Function" title="Permalink to this definition">¶</a></dt>
 <dd><p>The base Function class that all of the others inherit from.</p>
 <dl class="method">
+<dt id="pympl.function.Function.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#Function.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.Function.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple helper to make the function request and immediately return
+the result of its <code class="docutils literal"><span class="pre">call()</span></code> method.</p>
+<p>This allows us to do things like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Get the function object</span>
+<span class="n">AuthenticateUser</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">AuthenticateUser</span>
+
+<span class="c"># Now call it with the requested parameters</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">AuthenticateUser</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is short hand for:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">request</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">AuthenticateUser</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span>
+    <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">call</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
 <dt id="pympl.function.Function.make_request">
 <code class="descname">make_request</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#Function.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.Function.make_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates and returns a request object for the function. This method is
 often overridden by specific functions to augment behavior.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The request</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#pympl.function.FunctionRequest" title="pympl.function.FunctionRequest"><code class="xref py py-class docutils literal"><span class="pre">FunctionRequest</span></code></a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -237,15 +428,15 @@ often overridden by specific functions to augment behavior.</p>
 generally easier to use the <code class="xref py py-obj docutils literal"><span class="pre">pympl.Client.table</span></code> attribute to access
 a table object and create/update records via that mechanism.</p>
 <dl class="method">
-<dt id="AddRecord.__call__">
-<code class="descname">__call__</code><span class="sig-paren">(</span><em>TableName</em>, <em>PrimaryKeyField</em>, <em>RequestString</em><span class="sig-paren">)</span><a class="headerlink" href="#AddRecord.__call__" title="Permalink to this definition">¶</a></dt>
+<dt id="pympl.function.AddRecord.make_request">
+<code class="descname">make_request</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#AddRecord.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.AddRecord.make_request" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>TableName</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the Ministry Platform table to add a
-record to</li>
+record to.</li>
 <li><strong>PrimaryKeyField</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The primary key field name of the table that
 you want to add a record to. This is typically the singular form of
 the table name, suffixed with <code class="docutils literal"><span class="pre">_ID</span></code>. For example, if you wanted to
@@ -261,22 +452,380 @@ used that way.</li>
 </ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A new request object, which can be used to query the Ministry
+Platform API.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#pympl.function.AddRecordRequest" title="pympl.function.AddRecordRequest"><code class="xref py py-class docutils literal"><span class="pre">AddRecordRequest</span></code></a></p>
+</td>
+</tr>
 </tbody>
 </table>
-<p>Performs the API call. For example, if you wanted to add a record to the
-<code class="docutils literal"><span class="pre">Contacts</span></code> table, one might do something like the following:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">AddRecord</span><span class="p">(</span><span class="s">&#39;Contacts&#39;</span><span class="p">,</span> <span class="s">&#39;Contact_ID&#39;</span><span class="p">,</span> <span class="p">{</span>
-    <span class="s">&#39;Display_Name&#39;</span><span class="p">:</span> <span class="s">&#39;Smith, John&#39;</span><span class="p">,</span>
-    <span class="s">&#39;Email_Address&#39;</span><span class="p">:</span> <span class="s">&#39;johnsmith@thesmiths.com&#39;</span><span class="p">,</span>
-    <span class="s">&#39;First_Name&#39;</span><span class="p">:</span> <span class="s">&#39;John&#39;</span><span class="p">,</span>
-    <span class="s">&#39;Last_Name&#39;</span><span class="p">:</span> <span class="s">&#39;Smith&#39;</span>
-<span class="p">})</span>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.UpdateRecord">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">UpdateRecord</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#UpdateRecord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.UpdateRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like <a class="reference internal" href="#pympl.function.AddRecord" title="pympl.function.AddRecord"><code class="xref py py-class docutils literal"><span class="pre">AddRecord</span></code></a> but updates instead.</p>
+<dl class="method">
+<dt id="pympl.function.UpdateRecord.make_request">
+<code class="descname">make_request</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#UpdateRecord.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.UpdateRecord.make_request" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>TableName</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the Ministry Platform table to add a
+record to.</li>
+<li><strong>PrimaryKeyField</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The primary key field name of the table that
+you want to add a record to. This is typically the singular form of
+the table name, suffixed with <code class="docutils literal"><span class="pre">_ID</span></code>. For example, if you wanted to
+add a record to the <code class="docutils literal"><span class="pre">Contacts</span></code> table, the primary key field would
+be <code class="docutils literal"><span class="pre">Contact_ID</span></code>.</li>
+<li><strong>RequestString</strong> (<em>str|dict|RequestString</em>) &#8211; Either an instance of
+<a class="reference internal" href="#pympl.RequestString" title="pympl.RequestString"><code class="xref py py-class docutils literal"><span class="pre">pympl.RequestString</span></code></a> or a manually-formatted Ministry
+Platform request string. See the Ministry Platform documentation on
+request strings if you want to perform the formatting yourself.
+Alternatively, you can also pass a <a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a> as the request
+string and it will be converted to a <code class="docutils literal"><span class="pre">RequestString</span></code> object and
+used that way.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A new request object, which can be used to query the Ministry
+Platform API</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#pympl.function.UpdateRecordRequest" title="pympl.function.UpdateRecordRequest"><code class="xref py py-class docutils literal"><span class="pre">UpdateRecordRequest</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.AuthenticateUser">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">AuthenticateUser</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#AuthenticateUser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.AuthenticateUser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls the MP SOAP function &#8216;AuthenticateUser&#8217;. This is a common way to
+validate a user&#8217;s credentials and check for basic authorization.</p>
+<p>For example, one might want to do something like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">user_info</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">AuthenticateUser</span><span class="p">(</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="n">user_info</span><span class="p">[</span><span class="s">&#39;CanImpersonate&#39;</span><span class="p">]</span>
+<span class="n">user_info</span><span class="p">[</span><span class="s">&#39;UserID&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="AuthenticateUser.make_request">
+<code class="descname">make_request</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#AuthenticateUser.make_request" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>UserName</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The user name to check.</li>
+<li><strong>Password</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The password to check.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The function request object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#pympl.function.FunctionRequest" title="pympl.function.FunctionRequest"><code class="xref py py-class docutils literal"><span class="pre">FunctionRequest</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.GetUserInfo">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">GetUserInfo</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#GetUserInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.GetUserInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets information about the requested user ID. The response from the
+server is returned as a
+<a class="reference internal" href="#pympl.function.GetUserInfoResponse" title="pympl.function.GetUserInfoResponse"><code class="xref py py-class docutils literal"><span class="pre">GetUserInfoResponse</span></code></a>.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">user_info</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">GetUserInfo</span><span class="p">(</span><span class="n">UserID</span><span class="o">=</span><span class="mi">234</span><span class="p">)</span>
+<span class="n">user_info</span><span class="o">.</span><span class="n">contact</span>   <span class="c"># A Contact table object for the user</span>
+<span class="n">user_info</span><span class="o">.</span><span class="n">user</span>  <span class="c"># A User table object for the user</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="pympl.function.GetUserInfo.make_request">
+<code class="descname">make_request</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#GetUserInfo.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.GetUserInfo.make_request" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>UserID</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The user ID to look up.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The function request object.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#pympl.function.GetUserInfoRequest" title="pympl.function.GetUserInfoRequest"><code class="xref py py-class docutils literal"><span class="pre">GetUserInfoRequest</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.AttachFile">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">AttachFile</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#AttachFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.AttachFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attaches a file to a Ministry Platform record.</p>
+<p>For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">file_guid</span><span class="p">,</span> <span class="n">error_code</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">AttachFile</span><span class="p">(</span>
+    <span class="n">FileContents</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;/path/to/file.jpg&#39;</span><span class="p">),</span>
+    <span class="n">FileName</span><span class="o">=</span><span class="s">&#39;myfile.jpg&#39;</span><span class="p">,</span>
+    <span class="n">PageID</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span>
+    <span class="n">RecordID</span><span class="o">=</span><span class="mi">798</span><span class="p">,</span>
+    <span class="n">FileDescription</span><span class="o">=</span><span class="s">&#39;A picture of a thing&#39;</span><span class="p">,</span>
+    <span class="n">IsImage</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">ResizeLongestDimension</span><span class="o">=</span><span class="mi">0</span>  <span class="c"># Don&#39;t resize the image</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="pympl.function.AttachFile.make_request">
+<code class="descname">make_request</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#AttachFile.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.AttachFile.make_request" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>FileContents</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#file" title="(in Python v2.7)"><em>file</em></a>) &#8211; The file object to send to Ministry Platform.</li>
+<li><strong>FileName</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the file.</li>
+<li><strong>PageID</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The page ID that the record belongs to.</li>
+<li><strong>RecordID</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The record ID that you want to attach the file to.</li>
+<li><strong>FileDescription</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; A description of the file.</li>
+<li><strong>IsImage</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; Whether or not the file is an image.</li>
+<li><strong>ResizeLongestDimension</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The maximum size, in pixels, of an
+image&#8217;s longest side. Set to <code class="docutils literal"><span class="pre">0</span></code> to disable resize.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The function request object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#pympl.function.AttachFileRequest" title="pympl.function.AttachFileRequest"><code class="xref py py-class docutils literal"><span class="pre">AttachFileRequest</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.ExecuteStoredProcedure">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">ExecuteStoredProcedure</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#ExecuteStoredProcedure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.ExecuteStoredProcedure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes a stored procedure on the Ministry Platform MSSQL Server
+instance.</p>
+<p>NOTE: The <code class="xref py py-attr docutils literal"><span class="pre">pympl.client.Client.sp</span></code> attribute is the preferred method
+of executing stored procedures.</p>
+<dl class="method">
+<dt id="pympl.function.ExecuteStoredProcedure.make_request">
+<code class="descname">make_request</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#ExecuteStoredProcedure.make_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.ExecuteStoredProcedure.make_request" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>StoredProcedureName</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the stored procedure to
+execute. Only stored procedures that begin with <code class="docutils literal"><span class="pre">api</span></code> can be
+called.</li>
+<li><strong>RequestString</strong> (<em>str|dict|RequestString</em>) &#8211; The parameters to pass
+to the stored procedure.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The function request object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#pympl.function.ExecuteStoredProcedureRequest" title="pympl.function.ExecuteStoredProcedureRequest"><code class="xref py py-class docutils literal"><span class="pre">ExecuteStoredProcedureRequest</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="soap-function-request-and-response-types">
+<h3>SOAP Function Request and Response Types<a class="headerlink" href="#soap-function-request-and-response-types" title="Permalink to this headline">¶</a></h3>
+<p>These objects are used primarily for parsing requests and responses to and
+from the Ministry Platform API. Normally, there&#8217;s no need to interact with
+them directly.</p>
+</div>
+<div class="section" id="function-request-objects">
+<h3>Function Request Objects<a class="headerlink" href="#function-request-objects" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pympl.function.FunctionRequest">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">FunctionRequest</code><span class="sig-paren">(</span><em>function</em>, <em>args</em>, <em>kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#FunctionRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.FunctionRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple object that binds the function being called with the arguments
+that are to be passed to that function when it is called.</p>
+<p>This class is also responsible for creating the appropriate response, upon
+completion of the request. By default, the response is parsed to a
+standard <a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>. However, some functions return subclassed
+<code class="docutils literal"><span class="pre">FunctionRequest</span></code> which in turn parse responses into various other
+types of objects.</p>
+<dl class="method">
+<dt id="pympl.function.FunctionRequest.call">
+<code class="descname">call</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#FunctionRequest.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.FunctionRequest.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses arguments and calls the underlying Ministry Platform SOAP
+function.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.AddRecordRequest">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">AddRecordRequest</code><span class="sig-paren">(</span><em>function</em>, <em>args</em>, <em>kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#AddRecordRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.AddRecordRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the response into a tuple, if the request succeeds:
+<code class="docutils literal"><span class="pre">(record_id,</span> <span class="pre">0,</span> <span class="pre">message)</span></code>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.UpdateRecordRequest">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">UpdateRecordRequest</code><span class="sig-paren">(</span><em>function</em>, <em>args</em>, <em>kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#UpdateRecordRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.UpdateRecordRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Virtually identical to <a class="reference internal" href="#pympl.function.AddRecordRequest" title="pympl.function.AddRecordRequest"><code class="xref py py-class docutils literal"><span class="pre">pympl.function.AddRecordRequest</span></code></a>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.GetUserInfoRequest">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">GetUserInfoRequest</code><span class="sig-paren">(</span><em>function</em>, <em>args</em>, <em>kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#GetUserInfoRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.GetUserInfoRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple <code class="docutils literal"><span class="pre">FunctionRequest</span></code> object that returns a
+<a class="reference internal" href="#pympl.function.GetUserInfoResponse" title="pympl.function.GetUserInfoResponse"><code class="xref py py-class docutils literal"><span class="pre">GetUserInfoResponse</span></code></a>
+object, upon response parsing.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.AttachFileRequest">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">AttachFileRequest</code><span class="sig-paren">(</span><em>function</em>, <em>args</em>, <em>kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#AttachFileRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.AttachFileRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple function request that parsers the string response into a
+convenient tuple: <code class="docutils literal"><span class="pre">(guid,</span> <span class="pre">error_code,</span> <span class="pre">message)</span></code>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pympl.function.ExecuteStoredProcedureRequest">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">ExecuteStoredProcedureRequest</code><span class="sig-paren">(</span><em>function</em>, <em>args</em>, <em>kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#ExecuteStoredProcedureRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.ExecuteStoredProcedureRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function request for stored procedures. Parses the API response into
+an instance of
+<a class="reference internal" href="#pympl.function.ExecuteStoredProcedureResponse" title="pympl.function.ExecuteStoredProcedureResponse"><code class="xref py py-class docutils literal"><span class="pre">ExecuteStoredProcedureResponse</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="function-response-objects">
+<h3>Function Response Objects<a class="headerlink" href="#function-response-objects" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pympl.function.GetUserInfoResponse">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">GetUserInfoResponse</code><span class="sig-paren">(</span><em>request</em>, <em>response</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#GetUserInfoResponse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.GetUserInfoResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregates all of the data from <code class="docutils literal"><span class="pre">GetUserInfo</span></code> API call and dumps it into
+easy-to-use objects.</p>
+<dl class="attribute">
+<dt id="GetUserInfoResponse.request">
+<code class="descname">request</code><a class="headerlink" href="#GetUserInfoResponse.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function request object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GetUserInfoResponse.raw">
+<code class="descname">raw</code><a class="headerlink" href="#GetUserInfoResponse.raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>The raw response XML.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GetUserInfoResponse.contact">
+<code class="descname">contact</code><a class="headerlink" href="#GetUserInfoResponse.contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <code class="docutils literal"><span class="pre">Contacts</span></code> <a class="reference internal" href="#pympl.table.Table" title="pympl.table.Table"><code class="xref py py-class docutils literal"><span class="pre">Table</span></code></a> object instantiated
+with the user&#8217;s contact record data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GetUserInfoResponse.user">
+<code class="descname">user</code><a class="headerlink" href="#GetUserInfoResponse.user" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <code class="docutils literal"><span class="pre">dp_Users</span></code> <a class="reference internal" href="#pympl.table.Table" title="pympl.table.Table"><code class="xref py py-class docutils literal"><span class="pre">Table</span></code></a> object instantiated
+with the user&#8217;s user record data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GetUserInfoResponse.prefixes">
+<code class="descname">prefixes</code><a class="headerlink" href="#GetUserInfoResponse.prefixes" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a> of name prefixes from Ministry Platform.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">&#39;Prefix&#39;</span><span class="p">:</span> <span class="s">&#39;Mr.&#39;</span><span class="p">,</span> <span class="s">&#39;Prefix_ID&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="s">&#39;Prefix&#39;</span><span class="p">:</span> <span class="s">&#39;Mrs.&#39;</span><span class="p">,</span> <span class="s">&#39;Prefix_ID&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="o">...</span> <span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GetUserInfoResponse.suffixes">
+<code class="descname">suffixes</code><a class="headerlink" href="#GetUserInfoResponse.suffixes" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a> of name suffixes from Ministry Platform.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">&#39;Suffix_ID&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Suffix&#39;</span><span class="p">:</span> <span class="s">&#39;Jr.&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s">&#39;Suffix_ID&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&#39;Suffix&#39;</span><span class="p">:</span> <span class="s">&#39;Sr.&#39;</span><span class="p">},</span> <span class="o">...</span> <span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GetUserInfoResponse.genders">
+<code class="descname">genders</code><a class="headerlink" href="#GetUserInfoResponse.genders" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a> of genders from Ministry Platform.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[{</span><span class="s">&#39;Gender_ID&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Gender&#39;</span><span class="p">:</span> <span class="s">&#39;Male&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s">&#39;Gender_ID&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&#39;Gender&#39;</span><span class="p">:</span> <span class="s">&#39;Female&#39;</span><span class="p">}]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GetUserInfoResponse.marital_statuses">
+<code class="descname">marital_statuses</code><a class="headerlink" href="#GetUserInfoResponse.marital_statuses" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a> of marital satuses from Ministry Platform.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span>
+  <span class="p">{</span><span class="s">&#39;Marital_Status&#39;</span><span class="p">:</span> <span class="s">&#39;Single&#39;</span><span class="p">,</span> <span class="s">&#39;Marital_Status_ID&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+  <span class="p">{</span><span class="s">&#39;Marital_Status&#39;</span><span class="p">:</span> <span class="s">&#39;Married&#39;</span><span class="p">,</span> <span class="s">&#39;Marital_Status_ID&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+  <span class="o">...</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </dd></dl>
 
 </dd></dl>
 
+<dl class="class">
+<dt id="pympl.function.ExecuteStoredProcedureResponse">
+<em class="property">class </em><code class="descclassname">pympl.function.</code><code class="descname">ExecuteStoredProcedureResponse</code><span class="sig-paren">(</span><em>request</em>, <em>response</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#ExecuteStoredProcedureResponse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.ExecuteStoredProcedureResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains all of the table information returned by a stored procedure call.
+This object can be iterated over, which yields each of the response
+tables. In addition, each table can be accessed via attributes on the
+object, e.g. <code class="docutils literal"><span class="pre">response.table</span></code>, <code class="docutils literal"><span class="pre">response.table2</span></code>, <code class="docutils literal"><span class="pre">response.table3</span></code>.</p>
+<dl class="method">
+<dt id="pympl.function.ExecuteStoredProcedureResponse.as_dict">
+<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pympl/function.html#ExecuteStoredProcedureResponse.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pympl.function.ExecuteStoredProcedureResponse.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the response tables as a dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The stored procedure response.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 <div class="section" id="exceptions">
 <h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>

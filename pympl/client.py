@@ -67,6 +67,21 @@ class Client(object):
        In the instance of `AuthenticateUser`, a dictionary will be returned.
        Or, if an error occurred, a :class:`pympl.exc.FunctionError`
        will be thrown.
+
+    .. attribute:: sp
+
+       An instance of :class:`pympl.storedproc.StoredProcedureFactory`. This
+       object is used for initiating stored procedure calls on the MP
+       MSSQL Server instance.
+
+       For example::
+
+         response = client.sp.api_GetFormResponseById(ResponseID=3)
+
+    .. attribute:: table
+
+       An instance of :class:`pympl.table.TableFactory`. Used to easily create
+       :class:`Table <pympl.table.Table>` objects bound to the client.
     """
     def __init__(
             self, wsdl=None, guid=None, password=None, server_name=None,

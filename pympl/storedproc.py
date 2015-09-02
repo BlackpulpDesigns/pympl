@@ -7,10 +7,6 @@ class StoredProcedure(object):
         self.name = name
 
     def __call__(self, **kwargs):
-        #return self.client.fn.ExecuteStoredProcedure(
-        #    StoredProcedureName=self.name,
-        #    RequestString=str(RequestString(kwargs))
-        #)
         return self.make_request(**kwargs).call()
 
     def make_request(self, *args, **kwargs):

@@ -36,6 +36,24 @@ class Function(object):
         self.client = client
 
     def __call__(self, *args, **kwargs):
+        """
+        A simple helper to make the function request and immediately return
+        the result of its ``call()`` method.
+
+        This allows us to do things like::
+
+            # Get the function object
+            AuthenticateUser = client.fn.AuthenticateUser
+
+            # Now call it with the requested parameters
+            response = AuthenticateUser('username', 'password')
+
+        This is short hand for::
+
+            request = client.fn.AuthenticateUser.make_request(
+                'username', 'password')
+            response = request.call()
+        """
         request = self.make_request(*args, **kwargs)
         return request.call()
 
@@ -46,6 +64,9 @@ class Function(object):
         """
         Creates and returns a request object for the function. This method is
         often overridden by specific functions to augment behavior.
+
+        :return: The request
+        :rtype: :class:`FunctionRequest <pympl.function.FunctionRequest>`
         """
         return FunctionRequest(self, args, kwargs)
 
@@ -86,6 +107,16 @@ class GuidPasswordPrefill(object):
 
 
 class FunctionRequest(object):
+    """
+    A simple object that binds the function being called with the arguments
+    that are to be passed to that function when it is called.
+
+    This class is also responsible for creating the appropriate response, upon
+    completion of the request. By default, the response is parsed to a
+    standard :class:`dict`. However, some functions return subclassed
+    ``FunctionRequest`` which in turn parse responses into various other
+    types of objects.
+    """
     def __init__(self, function, args, kwargs):
         self.function = function
         self.args = args
@@ -95,6 +126,10 @@ class FunctionRequest(object):
         return "<pymple.function.%s>" % type(self).__name__
 
     def call(self):
+        """
+        Parses arguments and calls the underlying Ministry Platform SOAP
+        function.
+        """
         function_name = type(self.function).__name__
         function = getattr(self.function.client._suds.service, function_name)
         prepped_args = self.function._prepare_args(self.args, self.kwargs)
@@ -115,36 +150,6 @@ class AddRecord(Function):
     Adds a record to a Ministry Platform table. Please note that it's
     generally easier to use the :obj:`pympl.Client.table` attribute to access
     a table object and create/update records via that mechanism.
-
-
-    .. method:: __call__(TableName, PrimaryKeyField, RequestString)
-
-       :param str TableName: The name of the Ministry Platform table to add a
-           record to
-
-       :param str PrimaryKeyField: The primary key field name of the table that
-          you want to add a record to. This is typically the singular form of
-          the table name, suffixed with ``_ID``. For example, if you wanted to
-          add a record to the ``Contacts`` table, the primary key field would
-          be ``Contact_ID``.
-
-       :param str|dict|RequestString RequestString: Either an instance of
-          :class:`pympl.RequestString` or a manually-formatted Ministry
-          Platform request string. See the Ministry Platform documentation on
-          request strings if you want to perform the formatting yourself.
-          Alternatively, you can also pass a :class:`dict` as the request
-          string and it will be converted to a ``RequestString`` object and
-          used that way.
-
-       Performs the API call. For example, if you wanted to add a record to the
-       ``Contacts`` table, one might do something like the following::
-
-         client.fn.AddRecord('Contacts', 'Contact_ID', {
-             'Display_Name': 'Smith, John',
-             'Email_Address': 'johnsmith@thesmiths.com',
-             'First_Name': 'John',
-             'Last_Name': 'Smith'
-         })
     """
     _signature = (
         ('GUID', str),
@@ -163,10 +168,37 @@ class AddRecord(Function):
         }
 
     def make_request(self, *args, **kwargs):
+        """
+        :param str TableName: The name of the Ministry Platform table to add a
+           record to.
+
+        :param str PrimaryKeyField: The primary key field name of the table that
+           you want to add a record to. This is typically the singular form of
+           the table name, suffixed with ``_ID``. For example, if you wanted to
+           add a record to the ``Contacts`` table, the primary key field would
+           be ``Contact_ID``.
+
+        :param str|dict|RequestString RequestString: Either an instance of
+           :class:`pympl.RequestString` or a manually-formatted Ministry
+           Platform request string. See the Ministry Platform documentation on
+           request strings if you want to perform the formatting yourself.
+           Alternatively, you can also pass a :class:`dict` as the request
+           string and it will be converted to a ``RequestString`` object and
+           used that way.
+
+        :return: A new request object, which can be used to query the Ministry
+           Platform API.
+
+        :rtype: :class:`AddRecordRequest <pympl.function.AddRecordRequest>`
+        """
         return AddRecordRequest(self, args, kwargs)
 
 
 class AddRecordRequest(FunctionRequest):
+    """
+    Parses the response into a tuple, if the request succeeds:
+    ``(record_id, 0, message)``.
+    """
     def _parse_response(self, response):
         id_, junk, message = str(response).split('|', 2)
         if id_ == '0':
@@ -175,6 +207,9 @@ class AddRecordRequest(FunctionRequest):
 
 
 class UpdateRecord(Function):
+    """
+    Like :class:`AddRecord <pympl.function.AddRecord>` but updates instead.
+    """
     _signature = (
         ('GUID', str),
         ('Password', str),
@@ -192,10 +227,36 @@ class UpdateRecord(Function):
         }
 
     def make_request(self, *args, **kwargs):
+        """
+        :param str TableName: The name of the Ministry Platform table to add a
+           record to.
+
+        :param str PrimaryKeyField: The primary key field name of the table that
+           you want to add a record to. This is typically the singular form of
+           the table name, suffixed with ``_ID``. For example, if you wanted to
+           add a record to the ``Contacts`` table, the primary key field would
+           be ``Contact_ID``.
+
+        :param str|dict|RequestString RequestString: Either an instance of
+           :class:`pympl.RequestString` or a manually-formatted Ministry
+           Platform request string. See the Ministry Platform documentation on
+           request strings if you want to perform the formatting yourself.
+           Alternatively, you can also pass a :class:`dict` as the request
+           string and it will be converted to a ``RequestString`` object and
+           used that way.
+
+        :return: A new request object, which can be used to query the Ministry
+           Platform API
+        :rtype: :class:`UpdateRecordRequest
+           <pympl.function.UpdateRecordRequest>`
+        """
         return UpdateRecordRequest(self, args, kwargs)
 
 
 class UpdateRecordRequest(FunctionRequest):
+    """
+    Virtually identical to :class:`pympl.function.AddRecordRequest`.
+    """
     def _parse_response(self, response):
         id_, junk, message = str(response).split('|', 2)
         if id_ == '0':
@@ -204,6 +265,23 @@ class UpdateRecordRequest(FunctionRequest):
 
 
 class AuthenticateUser(Function):
+    """
+    Calls the MP SOAP function 'AuthenticateUser'. This is a common way to
+    validate a user's credentials and check for basic authorization.
+
+    For example, one might want to do something like this::
+
+        user_info = client.fn.AuthenticateUser('username', 'password')
+        user_info['CanImpersonate']
+        user_info['UserID']
+
+    .. method:: make_request(*args, **kwargs)
+
+       :param str UserName: The user name to check.
+       :param str Password: The password to check.
+       :return: The function request object
+       :rtype: :class:`FunctionRequest <pympl.function.FunctionRequest>`
+    """
     _signature = (
         ('UserName', str),
         ('Password', str),
@@ -217,6 +295,17 @@ class AuthenticateUser(Function):
 
 
 class GetUserInfo(Function):
+    """
+    Gets information about the requested user ID. The response from the
+    server is returned as a
+    :class:`GetUserInfoResponse <pympl.function.GetUserInfoResponse>`.
+
+    Example::
+
+        user_info = client.fn.GetUserInfo(UserID=234)
+        user_info.contact   # A Contact table object for the user
+        user_info.user  # A User table object for the user
+    """
     _signature = (
         ('GUID', str),
         ('Password', str),
@@ -230,15 +319,84 @@ class GetUserInfo(Function):
         }
 
     def make_request(self, *args, **kwargs):
+        """
+        :param int UserID: The user ID to look up.
+
+        :return: The function request object.
+        :rtype: :class:`GetUserInfoRequest <pympl.function.GetUserInfoRequest>`
+        """
         return GetUserInfoRequest(self, args, kwargs)
 
 
 class GetUserInfoRequest(FunctionRequest):
+    """
+    A simple ``FunctionRequest`` object that returns a
+    :class:`GetUserInfoResponse <pympl.function.GetUserInfoResponse>`
+    object, upon response parsing.
+    """
     def _parse_response(self, response):
         return GetUserInfoResponse(self, response)
 
 
 class GetUserInfoResponse(object):
+    """
+    Aggregates all of the data from ``GetUserInfo`` API call and dumps it into
+    easy-to-use objects.
+
+    .. attribute:: request
+
+       The function request object.
+
+    .. attribute:: raw
+
+       The raw response XML.
+
+    .. attribute:: contact
+
+       A ``Contacts`` :class:`Table <pympl.table.Table>` object instantiated
+       with the user's contact record data.
+
+    .. attribute:: user
+
+       A ``dp_Users`` :class:`Table <pympl.table.Table>` object instantiated
+       with the user's user record data.
+
+    .. attribute:: prefixes
+
+       A :class:`list` of name prefixes from Ministry Platform.
+
+       Example::
+
+         [{'Prefix': 'Mr.', 'Prefix_ID': 1}, {'Prefix': 'Mrs.', 'Prefix_ID': 2}, ... ]
+
+    .. attribute:: suffixes
+
+       A :class:`list` of name suffixes from Ministry Platform.
+
+       Example::
+
+         [{'Suffix_ID': 1, 'Suffix': 'Jr.'}, {'Suffix_ID': 2, 'Suffix': 'Sr.'}, ... ]
+
+    .. attribute:: genders
+
+       A :class:`list` of genders from Ministry Platform.
+
+       Example::
+
+         [{'Gender_ID': 1, 'Gender': 'Male'}, {'Gender_ID': 2, 'Gender': 'Female'}]
+
+    .. attribute:: marital_statuses
+
+       A :class:`list` of marital satuses from Ministry Platform.
+
+       Example::
+
+         [
+           {'Marital_Status': 'Single', 'Marital_Status_ID': 1},
+           {'Marital_Status': 'Married', 'Marital_Status_ID': 2},
+           ...
+         ]
+    """
     def __init__(self, request, response):
         self.request = request
         self.raw = response
@@ -268,6 +426,21 @@ def _encode_file_contents(obj):
 
 
 class AttachFile(Function):
+    """
+    Attaches a file to a Ministry Platform record.
+
+    For example::
+
+        file_guid, error_code, message = client.fn.AttachFile(
+            FileContents=open('/path/to/file.jpg'),
+            FileName='myfile.jpg',
+            PageID=23,
+            RecordID=798,
+            FileDescription='A picture of a thing',
+            IsImage=True,
+            ResizeLongestDimension=0  # Don't resize the image
+        )
+    """
     _signature = (
         ('GUID', str),
         ('Password', str),
@@ -288,10 +461,27 @@ class AttachFile(Function):
         }
 
     def make_request(self, *args, **kwargs):
+        """
+        :param file FileContents: The file object to send to Ministry Platform.
+        :param str FileName: The name of the file.
+        :param int PageID: The page ID that the record belongs to.
+        :param int RecordID: The record ID that you want to attach the file to.
+        :param str FileDescription: A description of the file.
+        :param bool IsImage: Whether or not the file is an image.
+        :param int ResizeLongestDimension: The maximum size, in pixels, of an
+            image's longest side. Set to ``0`` to disable resize.
+
+        :return: The function request object
+        :rtype: :class:`AttachFileRequest <pympl.function.AttachFileRequest>`
+        """
         return AttachFileRequest(self, args, kwargs)
 
 
 class AttachFileRequest(FunctionRequest):
+    """
+    A simple function request that parsers the string response into a
+    convenient tuple: ``(guid, error_code, message)``.
+    """
     def _parse_response(self, response):
         guid, junk, message = str(response).split('|', 2)
         return guid, int(junk), message
@@ -319,6 +509,13 @@ class UpdateDefaultImageRequest(FunctionRequest):
 
 
 class ExecuteStoredProcedure(Function, GuidPasswordPrefill):
+    """
+    Executes a stored procedure on the Ministry Platform MSSQL Server
+    instance.
+
+    NOTE: The :attr:`pympl.client.Client.sp` attribute is the preferred method
+    of executing stored procedures.
+    """
     _signature = (
         ('GUID', str),
         ('Password', str),
@@ -327,10 +524,25 @@ class ExecuteStoredProcedure(Function, GuidPasswordPrefill):
     )
 
     def make_request(self, *args, **kwargs):
+        """
+        :param str StoredProcedureName: The name of the stored procedure to
+            execute. Only stored procedures that begin with ``api`` can be
+            called.
+        :param str|dict|RequestString RequestString: The parameters to pass
+            to the stored procedure.
+
+        :return: The function request object
+        :rtype: :class:`ExecuteStoredProcedureRequest <pympl.function.ExecuteStoredProcedureRequest>`
+        """
         return ExecuteStoredProcedureRequest(self, args, kwargs)
 
 
 class ExecuteStoredProcedureRequest(FunctionRequest):
+    """
+    The function request for stored procedures. Parses the API response into
+    an instance of
+    :class:`ExecuteStoredProcedureResponse <pympl.function.ExecuteStoredProcedureResponse>`.
+    """
     def _parse_response(self, response):
         return ExecuteStoredProcedureResponse(self, response)
 
@@ -341,6 +553,12 @@ class ExecuteStoredProcedureRequest(FunctionRequest):
 
 
 class ExecuteStoredProcedureResponse(object):
+    """
+    Contains all of the table information returned by a stored procedure call.
+    This object can be iterated over, which yields each of the response
+    tables. In addition, each table can be accessed via attributes on the
+    object, e.g. ``response.table``, ``response.table2``, ``response.table3``.
+    """
     def __init__(self, request, response):
         self.request = request
         self.raw = response
@@ -359,6 +577,12 @@ class ExecuteStoredProcedureResponse(object):
             yield getattr(self._resolver, i)
 
     def as_dict(self):
+        """
+        Converts the response tables as a dictionary.
+
+        :return: The stored procedure response.
+        :rtype: dict
+        """
         result = {}
         for i in self._resolver.tables:
             result[i] = getattr(self._resolver, i)

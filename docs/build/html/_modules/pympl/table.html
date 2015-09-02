@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pympl.table &mdash; pympl 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="pympl 0.1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../../index.html" class="icon icon-home"> pympl
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#mainstream-classes">&#8220;Mainstream&#8221; Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#the-client-object">The Client Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#request-string-objects">Request String Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#table-objects">Table Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#low-er-level-soap-api">Low(er)-level SOAP API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#soap-function-request-and-response-types">SOAP Function Request and Response Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#function-request-objects">Function Request Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#function-response-objects">Function Response Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#exceptions">Exceptions</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">pympl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pympl.table</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <h1>Source code for pympl.table</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">inflect</span>
+<span class="kn">from</span> <span class="nn">pympl.requeststring</span> <span class="kn">import</span> <span class="n">RequestString</span>
+
+
+<span class="n">_inflect_engine</span> <span class="o">=</span> <span class="n">inflect</span><span class="o">.</span><span class="n">engine</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_derive_primary_key_from_table_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;dp_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">first_words</span> <span class="o">=</span> <span class="n">words</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">last_word</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">singular</span> <span class="o">=</span> <span class="n">_inflect_engine</span><span class="o">.</span><span class="n">singular_noun</span><span class="p">(</span><span class="n">last_word</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">singular</span><span class="p">:</span>
+        <span class="n">singular</span> <span class="o">=</span> <span class="n">last_word</span>
+    <span class="n">pk</span> <span class="o">=</span> <span class="n">first_words</span> <span class="o">+</span> <span class="p">[</span><span class="n">singular</span><span class="p">,</span> <span class="s">&#39;ID&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pk</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Table"><a class="viewcode-back" href="../../api/index.html#pympl.table.Table">[docs]</a><span class="k">class</span> <span class="nc">Table</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Table objects are a simple abstraction that sit on top of pympl&#39;s SOAP</span>
+<span class="sd">    function interface. They facilitate interacting with tables and records</span>
+<span class="sd">    more akin to what you&#39;d expect from an ORM.</span>
+
+<span class="sd">    To instantiate a table object, you should use the ``Client`` object&#39;s</span>
+<span class="sd">    ``table`` attribute, as this is an instance of</span>
+<span class="sd">    :class:`TableFactory &lt;pympl.table.TableFactory&gt;`. Accessing any</span>
+<span class="sd">    attribute on the ``TableFactory`` will create a ``Table`` object with that</span>
+<span class="sd">    attribute&#39;s name. By default, the primary key field is guessed by taking</span>
+<span class="sd">    the singular form of the last word of the table&#39;s name and appending</span>
+<span class="sd">    ``_ID`` to it.</span>
+
+<span class="sd">    For example, if we wanted to get an ``Table`` object for the Contacts</span>
+<span class="sd">    table, we can simply do::</span>
+
+<span class="sd">        Contacts = client.table.Contacts</span>
+
+<span class="sd">    This will return a ``Table`` object with the primary key field</span>
+<span class="sd">    ``Contact_ID``.</span>
+
+<span class="sd">    If the primary key for the table does not follow this convention, you may</span>
+<span class="sd">    specify it manually like so::</span>
+
+<span class="sd">        Some_Table = client.table[&#39;Some_Table&#39;, &#39;Some_Table_ID&#39;]</span>
+
+<span class="sd">    Once a ``Table`` object is acquired, :class:`Record &lt;pympl.table.Record&gt;`</span>
+<span class="sd">    objects can be created by either calling the ``Table`` object or by</span>
+<span class="sd">    calling the ``Table`` object&#39;s ``record()`` method::</span>
+
+<span class="sd">        record = client.table.Contacts(First_Name=&#39;Bob&#39;)</span>
+<span class="sd">        # or, alternatively:</span>
+<span class="sd">        record2 = client.table.Contacts.record(First_Name=&#39;Bob&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_key</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">primary_key</span> <span class="ow">or</span> <span class="n">_derive_primary_key_from_table_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Table.__call__"><a class="viewcode-back" href="../../api/index.html#pympl.table.Table.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new :class:`Record &lt;pympl.table.Record&gt;` object. Any</span>
+<span class="sd">        keyword arguments passed will be used to initialize the record object</span>
+<span class="sd">        with data.</span>
+
+<span class="sd">        This is calls :meth:`Table.record() &lt;pympl.table.Table.record&gt;`</span>
+<span class="sd">        internally.</span>
+
+<span class="sd">        :return: A new record</span>
+<span class="sd">        :rtype: :class:`Record &lt;pympl.table.Record&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;Table(</span><span class="si">%s</span><span class="s">, primary_key=</span><span class="si">%s</span><span class="s">)&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary_key</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Table.record"><a class="viewcode-back" href="../../api/index.html#pympl.table.Table.record">[docs]</a>    <span class="k">def</span> <span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">initial_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        See documentation for</span>
+<span class="sd">        :meth:`Table.__call__() &lt;pympl.table.Table.__call__&gt;`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">initial_data</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="Record"><a class="viewcode-back" href="../../api/index.html#pympl.table.Record">[docs]</a><span class="k">class</span> <span class="nc">Record</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides an ORM-like interface to Ministry Platform records. These objects</span>
+<span class="sd">    should almost always be instantiated by utilizing a ``Table`` object,</span>
+<span class="sd">    generated via :attr:`pympl.Client.table`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">initial_data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+        <span class="nb">dict</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;Record(</span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">)&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">primary_key</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">primary_key</span><span class="p">)</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Record.as_request_string"><a class="viewcode-back" href="../../api/index.html#pympl.table.Record.as_request_string">[docs]</a>    <span class="k">def</span> <span class="nf">as_request_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the data as a :class:`pympl.RequestString` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">RequestString</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Record.save"><a class="viewcode-back" href="../../api/index.html#pympl.table.Record.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves the record to the database. If the record is &quot;new&quot;, then</span>
+<span class="sd">        ``AddRecord`` is called; otherwise, ``UpdateRecord`` is.</span>
+
+<span class="sd">        :param int user_id: Optionally, one can specify which user should be</span>
+<span class="sd">            used for the add/update operation. If none is provided, the user</span>
+<span class="sd">            ID provided to the ``Client`` on initialization will be used</span>
+<span class="sd">            (if any).</span>
+
+<span class="sd">        :return: The response from the database.</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        :raises pympl.exc.AddRecordError: If new and operation fails.</span>
+<span class="sd">        :raises pympl.exc.UpdateRecordError: If not new and operation fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">final_user_id</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">user_id</span> <span class="k">if</span> <span class="n">user_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">user_id</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">AddRecord</span><span class="p">(</span>
+                <span class="n">TableName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">PrimaryKeyField</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">primary_key</span><span class="p">,</span>
+                <span class="n">RequestString</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_request_string</span><span class="p">()),</span>
+                <span class="n">UserID</span><span class="o">=</span><span class="n">final_user_id</span>
+            <span class="p">)</span>
+
+            <span class="c"># Add the newly-minited ID to the record</span>
+            <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">primary_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="n">UpdateRecord</span><span class="p">(</span>
+                <span class="n">TableName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">PrimaryKeyField</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">primary_key</span><span class="p">,</span>
+                <span class="n">RequestString</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_request_string</span><span class="p">()),</span>
+                <span class="n">UserID</span><span class="o">=</span><span class="n">final_user_id</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Whether or not the record all ready has a home in Ministry Platform or</span>
+<span class="sd">        not. This is determined by checking if the table&#39;s primary key field</span>
+<span class="sd">        exists in the record and is truthy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">primary_key</span><span class="p">))</span>
+
+</div>
+<span class="k">class</span> <span class="nc">TableFactory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">primary_key</span><span class="o">=</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Tim Radke.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -72,8 +72,19 @@
           
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#core-classes">Core Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#soap-functions">SOAP Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#mainstream-classes">&#8220;Mainstream&#8221; Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#the-client-object">The Client Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#request-string-objects">Request String Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#table-objects">Table Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html#low-er-level-soap-api">Low(er)-level SOAP API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#soap-function-request-and-response-types">SOAP Function Request and Response Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#function-request-objects">Function Request Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/index.html#function-response-objects">Function Response Objects</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../api/index.html#exceptions">Exceptions</a></li>
 </ul>
 </li>
@@ -152,10 +163,28 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
 
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Function.__call__"><a class="viewcode-back" href="../../api/index.html#pympl.function.Function.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A simple helper to make the function request and immediately return</span>
+<span class="sd">        the result of its ``call()`` method.</span>
+
+<span class="sd">        This allows us to do things like::</span>
+
+<span class="sd">            # Get the function object</span>
+<span class="sd">            AuthenticateUser = client.fn.AuthenticateUser</span>
+
+<span class="sd">            # Now call it with the requested parameters</span>
+<span class="sd">            response = AuthenticateUser(&#39;username&#39;, &#39;password&#39;)</span>
+
+<span class="sd">        This is short hand for::</span>
+
+<span class="sd">            request = client.fn.AuthenticateUser.make_request(</span>
+<span class="sd">                &#39;username&#39;, &#39;password&#39;)</span>
+<span class="sd">            response = request.call()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">call</span><span class="p">()</span>
-
+</div>
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&quot;&lt;pymple.function.</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span>
 
@@ -163,6 +192,9 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates and returns a request object for the function. This method is</span>
 <span class="sd">        often overridden by specific functions to augment behavior.</span>
+
+<span class="sd">        :return: The request</span>
+<span class="sd">        :rtype: :class:`FunctionRequest &lt;pympl.function.FunctionRequest&gt;`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">FunctionRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 </div>
@@ -202,7 +234,17 @@
         <span class="p">}</span>
 
 
-<span class="k">class</span> <span class="nc">FunctionRequest</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="FunctionRequest"><a class="viewcode-back" href="../../api/index.html#pympl.function.FunctionRequest">[docs]</a><span class="k">class</span> <span class="nc">FunctionRequest</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple object that binds the function being called with the arguments</span>
+<span class="sd">    that are to be passed to that function when it is called.</span>
+
+<span class="sd">    This class is also responsible for creating the appropriate response, upon</span>
+<span class="sd">    completion of the request. By default, the response is parsed to a</span>
+<span class="sd">    standard :class:`dict`. However, some functions return subclassed</span>
+<span class="sd">    ``FunctionRequest`` which in turn parse responses into various other</span>
+<span class="sd">    types of objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
@@ -211,14 +253,18 @@
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&quot;&lt;pymple.function.</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span>
 
-    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="FunctionRequest.call"><a class="viewcode-back" href="../../api/index.html#pympl.function.FunctionRequest.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parses arguments and calls the underlying Ministry Platform SOAP</span>
+<span class="sd">        function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">function_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span>
         <span class="n">function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_suds</span><span class="o">.</span><span class="n">service</span><span class="p">,</span> <span class="n">function_name</span><span class="p">)</span>
         <span class="n">prepped_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_response</span><span class="p">(</span>
             <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">prepped_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">prepped_args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="p">)</span>
-
+</div>
     <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_suds</span><span class="o">.</span><span class="n">dict</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
@@ -226,42 +272,12 @@
                 <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
 
-
+</div>
 <div class="viewcode-block" id="AddRecord"><a class="viewcode-back" href="../../api/index.html#pympl.function.AddRecord">[docs]</a><span class="k">class</span> <span class="nc">AddRecord</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a record to a Ministry Platform table. Please note that it&#39;s</span>
 <span class="sd">    generally easier to use the :obj:`pympl.Client.table` attribute to access</span>
 <span class="sd">    a table object and create/update records via that mechanism.</span>
-
-
-<span class="sd">    .. method:: __call__(TableName, PrimaryKeyField, RequestString)</span>
-
-<span class="sd">       :param str TableName: The name of the Ministry Platform table to add a</span>
-<span class="sd">           record to</span>
-
-<span class="sd">       :param str PrimaryKeyField: The primary key field name of the table that</span>
-<span class="sd">          you want to add a record to. This is typically the singular form of</span>
-<span class="sd">          the table name, suffixed with ``_ID``. For example, if you wanted to</span>
-<span class="sd">          add a record to the ``Contacts`` table, the primary key field would</span>
-<span class="sd">          be ``Contact_ID``.</span>
-
-<span class="sd">       :param str|dict|RequestString RequestString: Either an instance of</span>
-<span class="sd">          :class:`pympl.RequestString` or a manually-formatted Ministry</span>
-<span class="sd">          Platform request string. See the Ministry Platform documentation on</span>
-<span class="sd">          request strings if you want to perform the formatting yourself.</span>
-<span class="sd">          Alternatively, you can also pass a :class:`dict` as the request</span>
-<span class="sd">          string and it will be converted to a ``RequestString`` object and</span>
-<span class="sd">          used that way.</span>
-
-<span class="sd">       Performs the API call. For example, if you wanted to add a record to the</span>
-<span class="sd">       ``Contacts`` table, one might do something like the following::</span>
-
-<span class="sd">         client.fn.AddRecord(&#39;Contacts&#39;, &#39;Contact_ID&#39;, {</span>
-<span class="sd">             &#39;Display_Name&#39;: &#39;Smith, John&#39;,</span>
-<span class="sd">             &#39;Email_Address&#39;: &#39;johnsmith@thesmiths.com&#39;,</span>
-<span class="sd">             &#39;First_Name&#39;: &#39;John&#39;,</span>
-<span class="sd">             &#39;Last_Name&#39;: &#39;Smith&#39;</span>
-<span class="sd">         })</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
@@ -279,19 +295,49 @@
             <span class="s">&#39;UserID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">user_id</span>
         <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="AddRecord.make_request"><a class="viewcode-back" href="../../api/index.html#pympl.function.AddRecord.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param str TableName: The name of the Ministry Platform table to add a</span>
+<span class="sd">           record to.</span>
+
+<span class="sd">        :param str PrimaryKeyField: The primary key field name of the table that</span>
+<span class="sd">           you want to add a record to. This is typically the singular form of</span>
+<span class="sd">           the table name, suffixed with ``_ID``. For example, if you wanted to</span>
+<span class="sd">           add a record to the ``Contacts`` table, the primary key field would</span>
+<span class="sd">           be ``Contact_ID``.</span>
+
+<span class="sd">        :param str|dict|RequestString RequestString: Either an instance of</span>
+<span class="sd">           :class:`pympl.RequestString` or a manually-formatted Ministry</span>
+<span class="sd">           Platform request string. See the Ministry Platform documentation on</span>
+<span class="sd">           request strings if you want to perform the formatting yourself.</span>
+<span class="sd">           Alternatively, you can also pass a :class:`dict` as the request</span>
+<span class="sd">           string and it will be converted to a ``RequestString`` object and</span>
+<span class="sd">           used that way.</span>
+
+<span class="sd">        :return: A new request object, which can be used to query the Ministry</span>
+<span class="sd">           Platform API.</span>
+
+<span class="sd">        :rtype: :class:`AddRecordRequest &lt;pympl.function.AddRecordRequest&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">AddRecordRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
-</div>
-<span class="k">class</span> <span class="nc">AddRecordRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+</div></div>
+<div class="viewcode-block" id="AddRecordRequest"><a class="viewcode-back" href="../../api/index.html#pympl.function.AddRecordRequest">[docs]</a><span class="k">class</span> <span class="nc">AddRecordRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the response into a tuple, if the request succeeds:</span>
+<span class="sd">    ``(record_id, 0, message)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="n">id_</span><span class="p">,</span> <span class="n">junk</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">id_</span> <span class="o">==</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">AddRecordError</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;Exception: &#39;</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">id_</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">junk</span><span class="p">),</span> <span class="n">message</span><span class="p">)</span>
 
-
-<span class="k">class</span> <span class="nc">UpdateRecord</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="UpdateRecord"><a class="viewcode-back" href="../../api/index.html#pympl.function.UpdateRecord">[docs]</a><span class="k">class</span> <span class="nc">UpdateRecord</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Like :class:`AddRecord &lt;pympl.function.AddRecord&gt;` but updates instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
         <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
@@ -308,19 +354,62 @@
             <span class="s">&#39;UserID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">user_id</span>
         <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="UpdateRecord.make_request"><a class="viewcode-back" href="../../api/index.html#pympl.function.UpdateRecord.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param str TableName: The name of the Ministry Platform table to add a</span>
+<span class="sd">           record to.</span>
+
+<span class="sd">        :param str PrimaryKeyField: The primary key field name of the table that</span>
+<span class="sd">           you want to add a record to. This is typically the singular form of</span>
+<span class="sd">           the table name, suffixed with ``_ID``. For example, if you wanted to</span>
+<span class="sd">           add a record to the ``Contacts`` table, the primary key field would</span>
+<span class="sd">           be ``Contact_ID``.</span>
+
+<span class="sd">        :param str|dict|RequestString RequestString: Either an instance of</span>
+<span class="sd">           :class:`pympl.RequestString` or a manually-formatted Ministry</span>
+<span class="sd">           Platform request string. See the Ministry Platform documentation on</span>
+<span class="sd">           request strings if you want to perform the formatting yourself.</span>
+<span class="sd">           Alternatively, you can also pass a :class:`dict` as the request</span>
+<span class="sd">           string and it will be converted to a ``RequestString`` object and</span>
+<span class="sd">           used that way.</span>
+
+<span class="sd">        :return: A new request object, which can be used to query the Ministry</span>
+<span class="sd">           Platform API</span>
+<span class="sd">        :rtype: :class:`UpdateRecordRequest</span>
+<span class="sd">           &lt;pympl.function.UpdateRecordRequest&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">UpdateRecordRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
-
-<span class="k">class</span> <span class="nc">UpdateRecordRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+</div></div>
+<div class="viewcode-block" id="UpdateRecordRequest"><a class="viewcode-back" href="../../api/index.html#pympl.function.UpdateRecordRequest">[docs]</a><span class="k">class</span> <span class="nc">UpdateRecordRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Virtually identical to :class:`pympl.function.AddRecordRequest`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="n">id_</span><span class="p">,</span> <span class="n">junk</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">id_</span> <span class="o">==</span> <span class="s">&#39;0&#39;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">UpdateRecordError</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;Exception: &#39;</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">id_</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">junk</span><span class="p">),</span> <span class="n">message</span><span class="p">)</span>
 
+</div>
+<div class="viewcode-block" id="AuthenticateUser"><a class="viewcode-back" href="../../api/index.html#pympl.function.AuthenticateUser">[docs]</a><span class="k">class</span> <span class="nc">AuthenticateUser</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calls the MP SOAP function &#39;AuthenticateUser&#39;. This is a common way to</span>
+<span class="sd">    validate a user&#39;s credentials and check for basic authorization.</span>
 
-<span class="k">class</span> <span class="nc">AuthenticateUser</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+<span class="sd">    For example, one might want to do something like this::</span>
+
+<span class="sd">        user_info = client.fn.AuthenticateUser(&#39;username&#39;, &#39;password&#39;)</span>
+<span class="sd">        user_info[&#39;CanImpersonate&#39;]</span>
+<span class="sd">        user_info[&#39;UserID&#39;]</span>
+
+<span class="sd">    .. method:: make_request(*args, **kwargs)</span>
+
+<span class="sd">       :param str UserName: The user name to check.</span>
+<span class="sd">       :param str Password: The password to check.</span>
+<span class="sd">       :return: The function request object</span>
+<span class="sd">       :rtype: :class:`FunctionRequest &lt;pympl.function.FunctionRequest&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s">&#39;UserName&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
         <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
@@ -332,8 +421,19 @@
             <span class="s">&#39;ServerName&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">server_name</span>
         <span class="p">}</span>
 
+</div>
+<div class="viewcode-block" id="GetUserInfo"><a class="viewcode-back" href="../../api/index.html#pympl.function.GetUserInfo">[docs]</a><span class="k">class</span> <span class="nc">GetUserInfo</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets information about the requested user ID. The response from the</span>
+<span class="sd">    server is returned as a</span>
+<span class="sd">    :class:`GetUserInfoResponse &lt;pympl.function.GetUserInfoResponse&gt;`.</span>
 
-<span class="k">class</span> <span class="nc">GetUserInfo</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+<span class="sd">    Example::</span>
+
+<span class="sd">        user_info = client.fn.GetUserInfo(UserID=234)</span>
+<span class="sd">        user_info.contact   # A Contact table object for the user</span>
+<span class="sd">        user_info.user  # A User table object for the user</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
         <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
@@ -346,16 +446,85 @@
             <span class="s">&#39;Password&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">password</span>
         <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="GetUserInfo.make_request"><a class="viewcode-back" href="../../api/index.html#pympl.function.GetUserInfo.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param int UserID: The user ID to look up.</span>
+
+<span class="sd">        :return: The function request object.</span>
+<span class="sd">        :rtype: :class:`GetUserInfoRequest &lt;pympl.function.GetUserInfoRequest&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">GetUserInfoRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
-
-<span class="k">class</span> <span class="nc">GetUserInfoRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+</div></div>
+<div class="viewcode-block" id="GetUserInfoRequest"><a class="viewcode-back" href="../../api/index.html#pympl.function.GetUserInfoRequest">[docs]</a><span class="k">class</span> <span class="nc">GetUserInfoRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple ``FunctionRequest`` object that returns a</span>
+<span class="sd">    :class:`GetUserInfoResponse &lt;pympl.function.GetUserInfoResponse&gt;`</span>
+<span class="sd">    object, upon response parsing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">GetUserInfoResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
 
+</div>
+<div class="viewcode-block" id="GetUserInfoResponse"><a class="viewcode-back" href="../../api/index.html#pympl.function.GetUserInfoResponse">[docs]</a><span class="k">class</span> <span class="nc">GetUserInfoResponse</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Aggregates all of the data from ``GetUserInfo`` API call and dumps it into</span>
+<span class="sd">    easy-to-use objects.</span>
 
-<span class="k">class</span> <span class="nc">GetUserInfoResponse</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="sd">    .. attribute:: request</span>
+
+<span class="sd">       The function request object.</span>
+
+<span class="sd">    .. attribute:: raw</span>
+
+<span class="sd">       The raw response XML.</span>
+
+<span class="sd">    .. attribute:: contact</span>
+
+<span class="sd">       A ``Contacts`` :class:`Table &lt;pympl.table.Table&gt;` object instantiated</span>
+<span class="sd">       with the user&#39;s contact record data.</span>
+
+<span class="sd">    .. attribute:: user</span>
+
+<span class="sd">       A ``dp_Users`` :class:`Table &lt;pympl.table.Table&gt;` object instantiated</span>
+<span class="sd">       with the user&#39;s user record data.</span>
+
+<span class="sd">    .. attribute:: prefixes</span>
+
+<span class="sd">       A :class:`list` of name prefixes from Ministry Platform.</span>
+
+<span class="sd">       Example::</span>
+
+<span class="sd">         [{&#39;Prefix&#39;: &#39;Mr.&#39;, &#39;Prefix_ID&#39;: 1}, {&#39;Prefix&#39;: &#39;Mrs.&#39;, &#39;Prefix_ID&#39;: 2}, ... ]</span>
+
+<span class="sd">    .. attribute:: suffixes</span>
+
+<span class="sd">       A :class:`list` of name suffixes from Ministry Platform.</span>
+
+<span class="sd">       Example::</span>
+
+<span class="sd">         [{&#39;Suffix_ID&#39;: 1, &#39;Suffix&#39;: &#39;Jr.&#39;}, {&#39;Suffix_ID&#39;: 2, &#39;Suffix&#39;: &#39;Sr.&#39;}, ... ]</span>
+
+<span class="sd">    .. attribute:: genders</span>
+
+<span class="sd">       A :class:`list` of genders from Ministry Platform.</span>
+
+<span class="sd">       Example::</span>
+
+<span class="sd">         [{&#39;Gender_ID&#39;: 1, &#39;Gender&#39;: &#39;Male&#39;}, {&#39;Gender_ID&#39;: 2, &#39;Gender&#39;: &#39;Female&#39;}]</span>
+
+<span class="sd">    .. attribute:: marital_statuses</span>
+
+<span class="sd">       A :class:`list` of marital satuses from Ministry Platform.</span>
+
+<span class="sd">       Example::</span>
+
+<span class="sd">         [</span>
+<span class="sd">           {&#39;Marital_Status&#39;: &#39;Single&#39;, &#39;Marital_Status_ID&#39;: 1},</span>
+<span class="sd">           {&#39;Marital_Status&#39;: &#39;Married&#39;, &#39;Marital_Status_ID&#39;: 2},</span>
+<span class="sd">           ...</span>
+<span class="sd">         ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="n">request</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">response</span>
@@ -376,7 +545,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;User_Name&#39;</span><span class="p">)</span>
         <span class="p">)</span>
 
-
+</div>
 <span class="k">def</span> <span class="nf">_encode_file_contents</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;read&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;base64&#39;</span><span class="p">)</span>
@@ -384,7 +553,22 @@
         <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;base64&#39;</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">AttachFile</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+<div class="viewcode-block" id="AttachFile"><a class="viewcode-back" href="../../api/index.html#pympl.function.AttachFile">[docs]</a><span class="k">class</span> <span class="nc">AttachFile</span><span class="p">(</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attaches a file to a Ministry Platform record.</span>
+
+<span class="sd">    For example::</span>
+
+<span class="sd">        file_guid, error_code, message = client.fn.AttachFile(</span>
+<span class="sd">            FileContents=open(&#39;/path/to/file.jpg&#39;),</span>
+<span class="sd">            FileName=&#39;myfile.jpg&#39;,</span>
+<span class="sd">            PageID=23,</span>
+<span class="sd">            RecordID=798,</span>
+<span class="sd">            FileDescription=&#39;A picture of a thing&#39;,</span>
+<span class="sd">            IsImage=True,</span>
+<span class="sd">            ResizeLongestDimension=0  # Don&#39;t resize the image</span>
+<span class="sd">        )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
         <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
@@ -404,16 +588,33 @@
             <span class="s">&#39;ResizeLongestDimension&#39;</span><span class="p">:</span> <span class="mi">0</span>
         <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="AttachFile.make_request"><a class="viewcode-back" href="../../api/index.html#pympl.function.AttachFile.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param file FileContents: The file object to send to Ministry Platform.</span>
+<span class="sd">        :param str FileName: The name of the file.</span>
+<span class="sd">        :param int PageID: The page ID that the record belongs to.</span>
+<span class="sd">        :param int RecordID: The record ID that you want to attach the file to.</span>
+<span class="sd">        :param str FileDescription: A description of the file.</span>
+<span class="sd">        :param bool IsImage: Whether or not the file is an image.</span>
+<span class="sd">        :param int ResizeLongestDimension: The maximum size, in pixels, of an</span>
+<span class="sd">            image&#39;s longest side. Set to ``0`` to disable resize.</span>
+
+<span class="sd">        :return: The function request object</span>
+<span class="sd">        :rtype: :class:`AttachFileRequest &lt;pympl.function.AttachFileRequest&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">AttachFileRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
-
-<span class="k">class</span> <span class="nc">AttachFileRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+</div></div>
+<div class="viewcode-block" id="AttachFileRequest"><a class="viewcode-back" href="../../api/index.html#pympl.function.AttachFileRequest">[docs]</a><span class="k">class</span> <span class="nc">AttachFileRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple function request that parsers the string response into a</span>
+<span class="sd">    convenient tuple: ``(guid, error_code, message)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="n">guid</span><span class="p">,</span> <span class="n">junk</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">guid</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">junk</span><span class="p">),</span> <span class="n">message</span>
 
-
+</div>
 <span class="k">class</span> <span class="nc">UpdateDefaultImage</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">GuidPasswordPrefill</span><span class="p">):</span>
     <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
@@ -435,7 +636,14 @@
         <span class="k">return</span> <span class="n">guid</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">junk</span><span class="p">),</span> <span class="n">message</span>
 
 
-<span class="k">class</span> <span class="nc">ExecuteStoredProcedure</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">GuidPasswordPrefill</span><span class="p">):</span>
+<div class="viewcode-block" id="ExecuteStoredProcedure"><a class="viewcode-back" href="../../api/index.html#pympl.function.ExecuteStoredProcedure">[docs]</a><span class="k">class</span> <span class="nc">ExecuteStoredProcedure</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">GuidPasswordPrefill</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Executes a stored procedure on the Ministry Platform MSSQL Server</span>
+<span class="sd">    instance.</span>
+
+<span class="sd">    NOTE: The :attr:`pympl.client.Client.sp` attribute is the preferred method</span>
+<span class="sd">    of executing stored procedures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
         <span class="p">(</span><span class="s">&#39;Password&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
@@ -443,11 +651,26 @@
         <span class="p">(</span><span class="s">&#39;RequestString&#39;</span><span class="p">,</span> <span class="n">_make_request_string</span><span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="ExecuteStoredProcedure.make_request"><a class="viewcode-back" href="../../api/index.html#pympl.function.ExecuteStoredProcedure.make_request">[docs]</a>    <span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param str StoredProcedureName: The name of the stored procedure to</span>
+<span class="sd">            execute. Only stored procedures that begin with ``api`` can be</span>
+<span class="sd">            called.</span>
+<span class="sd">        :param str|dict|RequestString RequestString: The parameters to pass</span>
+<span class="sd">            to the stored procedure.</span>
+
+<span class="sd">        :return: The function request object</span>
+<span class="sd">        :rtype: :class:`ExecuteStoredProcedureRequest &lt;pympl.function.ExecuteStoredProcedureRequest&gt;`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ExecuteStoredProcedureRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 
-
-<span class="k">class</span> <span class="nc">ExecuteStoredProcedureRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+</div></div>
+<div class="viewcode-block" id="ExecuteStoredProcedureRequest"><a class="viewcode-back" href="../../api/index.html#pympl.function.ExecuteStoredProcedureRequest">[docs]</a><span class="k">class</span> <span class="nc">ExecuteStoredProcedureRequest</span><span class="p">(</span><span class="n">FunctionRequest</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The function request for stored procedures. Parses the API response into</span>
+<span class="sd">    an instance of</span>
+<span class="sd">    :class:`ExecuteStoredProcedureResponse &lt;pympl.function.ExecuteStoredProcedureResponse&gt;`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">ExecuteStoredProcedureResponse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
 
@@ -456,8 +679,14 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;StoredProcedureName&#39;</span><span class="p">,</span> <span class="s">&#39;N/A&#39;</span><span class="p">)</span>
         <span class="p">)</span>
 
-
-<span class="k">class</span> <span class="nc">ExecuteStoredProcedureResponse</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ExecuteStoredProcedureResponse"><a class="viewcode-back" href="../../api/index.html#pympl.function.ExecuteStoredProcedureResponse">[docs]</a><span class="k">class</span> <span class="nc">ExecuteStoredProcedureResponse</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Contains all of the table information returned by a stored procedure call.</span>
+<span class="sd">    This object can be iterated over, which yields each of the response</span>
+<span class="sd">    tables. In addition, each table can be accessed via attributes on the</span>
+<span class="sd">    object, e.g. ``response.table``, ``response.table2``, ``response.table3``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">request</span> <span class="o">=</span> <span class="n">request</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="n">response</span>
@@ -475,13 +704,19 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
             <span class="k">yield</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ExecuteStoredProcedureResponse.as_dict"><a class="viewcode-back" href="../../api/index.html#pympl.function.ExecuteStoredProcedureResponse.as_dict">[docs]</a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts the response tables as a dictionary.</span>
+
+<span class="sd">        :return: The stored procedure response.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
             <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
 
-
+</div></div>
 <span class="k">class</span> <span class="nc">FindOrCreateUserAccount</span><span class="p">(</span><span class="n">Function</span><span class="p">,</span> <span class="n">GuidPasswordPrefill</span><span class="p">):</span>
     <span class="n">_signature</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s">&#39;GUID&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
