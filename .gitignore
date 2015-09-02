@@ -1,4 +1,7 @@
+/build
+/dist
 /venv
+/python_mp.egg-info
 /.pympl
 *.pyc
 *.sublime-workspace
