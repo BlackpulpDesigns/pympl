@@ -6,6 +6,9 @@ def _get_table_schemas(schema):
     result = {}
     nodes = schema.element.complexType.choice.element
 
+    if not isinstance(nodes, list):
+        nodes = [nodes]
+
     for i in nodes:
         result[str(i._name)] = TableSchema(i)
 
@@ -22,6 +25,7 @@ class SchemaResolver(object):
         self.diffgram = diffgram
         self._check_for_error()
         self.tables = []
+
         schemas = _get_table_schemas(schema)
 
         for table_name, table_schema in schemas.iteritems():
@@ -38,7 +42,8 @@ class SchemaResolver(object):
                 parsed_row = {}
                 for column_name, value in (i for i in row if i[0] in types):
                     type_ = types.get(column_name, all_types['string'])
-                    parsed_row[column_name] = type_.decode(str(value))
+                    parsed_row[column_name] = type_.decode(
+                        value.encode('utf8'))
                 result.append(parsed_row)
 
             setattr(self, table_name, result)

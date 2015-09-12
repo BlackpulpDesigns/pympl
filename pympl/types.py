@@ -80,6 +80,14 @@ class Uuid(object):
         return uuid.UUID(value) if value else None
 
 
+class Duration(object):
+    def encode(self, value):
+        return value
+
+    def decode(self, value):
+        return value
+
+
 DATETIME = DateTime()
 STRING = String()
 INTEGER = Integer()
@@ -88,6 +96,7 @@ NUMERIC = Numeric()
 BOOLEAN = Boolean()
 NULL = Null()
 UUID = Uuid()
+DURATION = Duration()
 
 
 def encode_value(value):
@@ -131,5 +140,6 @@ all_types = {
     'binary': STRING,
     'time': STRING,
     'datetime': DATETIME,
-    'base64Binary': STRING
+    'base64Binary': STRING,
+    'duration': DURATION
 }
