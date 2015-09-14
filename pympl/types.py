@@ -58,7 +58,7 @@ class Numeric(object):
 
 class Boolean(object):
     def encode(self, value):
-        return '' if value is None else v == 1 or v == 'true'
+        return '' if value is None else value == 1 or value == 'true'
 
     def decode(self, value):
         return value == 'true' or value == '1'
