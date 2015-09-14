@@ -108,7 +108,8 @@ def encode_value(value):
         bool: BOOLEAN,
         float: FLOAT,
         type(None): NULL,
-        uuid.UUID: UUID
+        uuid.UUID: UUID,
+        date: DATE
     }
 
     if type(value) in encoding_map:
@@ -122,7 +123,7 @@ all_types = {
     'string': STRING,
     'boolean': BOOLEAN,
     'dateTime': DATETIME,
-    'date': DATE,
+    'date': STRING,
     'bit': INTEGER,
     'smallint': INTEGER,
     'bigint': INTEGER,
