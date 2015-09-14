@@ -89,6 +89,7 @@ class Duration(object):
 
 
 DATETIME = DateTime()
+DATE = Date()
 STRING = String()
 INTEGER = Integer()
 FLOAT = Float()
@@ -121,7 +122,7 @@ all_types = {
     'string': STRING,
     'boolean': BOOLEAN,
     'dateTime': DATETIME,
-    'date': STRING,
+    'date': DATE,
     'bit': INTEGER,
     'smallint': INTEGER,
     'bigint': INTEGER,
